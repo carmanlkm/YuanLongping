@@ -1,1475 +1,1786 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>爆旋陀螺 語文閱讀大對決</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS XLSX Export Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Noto+Sans+TC:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>爆旋陀螺：袁隆平故事挑戰賽</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SheetJS for Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Noto+Sans+TC:wght@400;600;800&display=swap');
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background-color: #0b0f19;
+      color: #f3f4f6;
+      overflow-x: hidden;
+    }
+    .font-tech {
+      font-family: 'Chakra Petch', 'Noto Sans TC', sans-serif;
+    }
     
-    <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #0b0f19;
-            color: #f3f4f6;
-            touch-action: manipulation;
-            overflow-x: hidden;
-        }
-        .font-tech {
-            font-family: 'Chakra Petch', sans-serif;
-        }
-        /* Custom Animations */
-        @keyframes bell-ring {
-            0%, 100% { transform: rotate(0deg); }
-            20%, 60% { transform: rotate(15deg); }
-            40%, 80% { transform: rotate(-15deg); }
-        }
-        .animate-bell {
-            animation: bell-ring 2s infinite ease-in-out;
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); }
-            50% { box-shadow: 0 0 30px rgba(245, 158, 11, 0.9); }
-        }
-        .pulse-border {
-            animation: pulse-glow 2s infinite;
-        }
-        /* Canvas Stadium Styling */
-        #stadiumCanvas {
-            background: radial-gradient(circle, #1e293b 0%, #0f172a 70%, #020617 100%);
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 0 25px rgba(59, 130, 246, 0.3);
-            border-radius: 50%;
-        }
-        /* Glassmorphism */
-        .glass-panel {
-            background: rgba(17, 24, 39, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-    </style>
+    /* Bell glow animation */
+    @keyframes bellGlow {
+      0%, 100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 5px #f59e0b); }
+      20% { transform: rotate(-15deg) scale(1.15); filter: drop-shadow(0 0 12px #fbbf24); }
+      40% { transform: rotate(15deg) scale(1.15); filter: drop-shadow(0 0 15px #f59e0b); }
+      60% { transform: rotate(-10deg) scale(1.1); filter: drop-shadow(0 0 10px #d97706); }
+      80% { transform: rotate(10deg) scale(1.05); filter: drop-shadow(0 0 8px #f59e0b); }
+    }
+    .animate-bell {
+      animation: bellGlow 2.5s infinite ease-in-out;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #111827;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
+
+    .stadium-shadow {
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 0 25px rgba(59, 130, 246, 0.3);
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between select-none">
+<body class="min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
 
-    <!-- TOP NAVIGATION BAR -->
-    <header class="bg-slate-900/90 border-b border-slate-800 px-4 py-3 sticky top-0 z-40 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <!-- App Logo & Title -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-amber-500 to-yellow-300 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-red-500/30">
-                    <i class="fa-solid fa-compact-disc fa-spin"></i>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-lg sm:text-xl tracking-wider bg-gradient-to-r from-red-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent">
-                        爆旋陀螺：語文對決
-                    </h1>
-                    <p class="text-xs text-slate-400">閱讀理解戰場 · 袁隆平篇</p>
-                </div>
-            </div>
-
-            <!-- Student Info & Action Buttons -->
-            <div class="flex items-center gap-3">
-                <div id="studentBadge" class="hidden sm:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-semibold">
-                    <span class="text-amber-400"><i class="fa-solid fa-user-graduate mr-1"></i><span id="displayClass">--</span> 班</span>
-                    <span class="text-slate-500">|</span>
-                    <span class="text-cyan-400"><span id="displayNum">--</span> 號</span>
-                </div>
-
-                <!-- Music / Audio Toggle -->
-                <button id="bgmToggleBtn" onclick="toggleAudio()" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition">
-                    <i id="bgmIcon" class="fa-solid fa-volume-xmark text-red-400"></i>
-                </button>
-
-                <!-- Flashing Security Bell Icon for Teachers -->
-                <button onclick="openTeacherAuthModal()" class="relative w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 hover:bg-amber-500/20 transition group" title="教師管理面板">
-                    <i class="fa-solid fa-bell text-lg animate-bell"></i>
-                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
-                    </span>
-                </button>
-            </div>
+  <!-- Top Navigation Header -->
+  <header class="bg-gray-900/90 border-b border-gray-800 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Title & Branding -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-amber-500 p-0.5 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <div class="w-full h-full bg-gray-900 rounded-[10px] flex items-center justify-center">
+            <i class="fa-solid font-tech text-amber-400 text-xl fa-dharmachakra animate-spin" style="animation-duration: 8s;"></i>
+          </div>
         </div>
-    </header>
-
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 flex flex-col justify-center">
-
-        <!-- LOGIN OVERLAY MODAL -->
-        <div id="loginModal" class="fixed inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-4 backdrop-blur-md">
-            <div class="max-w-md w-full glass-panel rounded-2xl p-6 sm:p-8 shadow-2xl border border-red-500/30 text-center relative overflow-hidden">
-                <div class="absolute -top-10 -left-10 w-32 h-32 bg-red-600/20 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-amber-600/20 rounded-full blur-3xl"></div>
-                
-                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-red-500 to-amber-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-red-500/40">
-                    <i class="fa-solid fa-trophy text-slate-950"></i>
-                </div>
-
-                <h2 class="text-2xl font-black text-white mb-2">準備進入爆旋戰場！</h2>
-                <p class="text-slate-400 text-sm mb-6">請先輸入學生班別及學號以進行數據記錄與認證。</p>
-
-                <form onsubmit="handleLoginSubmit(event)" class="space-y-4 text-left">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">班別 (Class)</label>
-                        <input type="text" id="inputClass" required placeholder="例如：4A, 5B, 6C" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-red-500 font-bold transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">學號 (Student No.)</label>
-                        <input type="number" id="inputNum" required min="1" max="50" placeholder="例如：12" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-red-500 font-bold transition">
-                    </div>
-                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-red-600 via-amber-600 to-yellow-500 hover:from-red-500 hover:to-yellow-400 text-slate-950 font-black rounded-xl shadow-lg shadow-red-600/30 transform active:scale-95 transition text-lg mt-2">
-                        開始任務 <i class="fa-solid fa-bolt ml-2"></i>
-                    </button>
-                </form>
-            </div>
+        <div>
+          <h1 class="text-lg md:text-xl font-bold font-tech bg-gradient-to-r from-blue-400 via-indigo-200 to-amber-300 bg-clip-text text-transparent">
+            爆旋陀螺：袁隆平故事挑戰賽
+          </h1>
+          <p class="text-xs text-gray-400 flex items-center gap-2">
+            <span>閱讀理解 x 陀螺對戰</span>
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span id="sync-status" class="text-emerald-400 font-mono text-[10px]">雲端實時同步中</span>
+          </p>
         </div>
+      </div>
 
-        <!-- STORY & INSTRUCTIONS BRIEFING MODAL -->
-        <div id="introModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-4 backdrop-blur-md">
-            <div class="max-w-2xl w-full glass-panel rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-500/30 text-left relative">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-4">
-                    <h3 class="text-xl font-bold text-amber-400 flex items-center gap-2">
-                        <i class="fa-solid fa-scroll"></i> 爆旋陀螺對決說明與戰術指南
-                    </h3>
-                    <button onclick="skipIntro()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg border border-slate-700 transition">
-                        略過 (Skip) <i class="fa-solid fa-forward ml-1"></i>
-                    </button>
-                </div>
-
-                <div class="space-y-4 text-sm text-slate-300 leading-relaxed max-h-[60vh] overflow-y-auto pr-2">
-                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                        <p class="font-bold text-amber-300 mb-1">📖 故事背景：</p>
-                        <p>歡迎來到全國爆旋陀螺聯賽！在這裡，知識就是力量。閱讀《雜交水稻之父～袁隆平》的故事，回答問題解鎖威力無匹的高級爆旋陀螺！</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-                            <span class="text-red-400 font-bold block mb-1">⚔️ 對戰計分（先得 4 分獲勝）</span>
-                            <ul class="text-xs space-y-1 text-slate-400">
-                                <li>• <strong class="text-amber-400">極限勝利：</strong> 3 分</li>
-                                <li>• <strong class="text-amber-400">擊飛 / 爆裂勝利：</strong> 2 分</li>
-                                <li>• <strong class="text-amber-400">迴旋勝利：</strong> 1 分</li>
-                            </ul>
-                        </div>
-                        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-                            <span class="text-cyan-400 font-bold block mb-1">🔓 陀螺解鎖與速度機制</span>
-                            <ul class="text-xs space-y-1 text-slate-400">
-                                <li>• 初始（薯片龍/暴龍）：慢速</li>
-                                <li>• 答對 4 題（鯊魚/鳳凰）：快速</li>
-                                <li>• 答對 8 題（神杖/天馬/鈷藍龍）：極速 + 強烈火花！</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="bg-red-950/40 p-3 rounded-lg border border-red-900/50 text-xs text-red-300">
-                        <i class="fa-solid fa-circle-info mr-1"></i> <strong>通關條件：</strong> 贏得 5 局對決，且必須答對全部 12 條閱讀理解題目（允許補答）才能奪得最終冠軍獎盃並觀賞慶祝煙花！
-                    </div>
-                </div>
-
-                <div class="mt-6 flex justify-end">
-                    <button onclick="skipIntro()" class="px-6 py-3 bg-gradient-to-r from-red-600 to-amber-500 text-slate-950 font-extrabold rounded-xl shadow-lg hover:brightness-110 transition">
-                        明白，踏入戰場！ <i class="fa-solid fa-gamepad ml-2"></i>
-                    </button>
-                </div>
-            </div>
+      <!-- User Info & Progress Indicators -->
+      <div id="header-user-info" class="hidden flex items-center gap-4 text-xs md:text-sm">
+        <div class="bg-gray-800/80 border border-gray-700/60 rounded-lg px-3 py-1.5 flex items-center gap-2">
+          <i class="fa-solid fa-id-card text-blue-400"></i>
+          <span class="text-gray-300">學生：<strong id="display-user-id" class="text-white font-mono">--</strong></span>
         </div>
-
-        <!-- GAME PLAY HUB & ARENA -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            
-            <!-- LEFT PANEL: Beyblade Selection & Quiz Station Launcher (4 Cols) -->
-            <div class="lg:col-span-5 space-y-5">
-                
-                <!-- Quiz Challenge Card Banner -->
-                <div class="glass-panel p-5 rounded-2xl border border-amber-500/20 relative overflow-hidden">
-                    <div class="flex justify-between items-center mb-3">
-                        <div>
-                            <h3 class="font-extrabold text-amber-400 text-lg flex items-center gap-2">
-                                <i class="fa-solid fa-book-open"></i> 閱讀解鎖試煉場
-                            </h3>
-                            <p class="text-xs text-slate-400">答題解鎖高級強效陀螺</p>
-                        </div>
-                        <span id="quizProgressBadge" class="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 font-black rounded-lg text-sm">
-                            0 / 12 正確
-                        </span>
-                    </div>
-
-                    <!-- Progress Bar -->
-                    <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden mb-4 border border-slate-800">
-                        <div id="quizProgressBar" class="bg-gradient-to-r from-amber-500 to-yellow-300 h-full w-0 transition-all duration-500"></div>
-                    </div>
-
-                    <button onclick="openQuizModal()" class="w-full py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:brightness-110 text-white font-black rounded-xl shadow-lg shadow-purple-600/30 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-pen-nib"></i> 前往回答問題 (答題館)
-                    </button>
-                </div>
-
-                <!-- Beyblade Deck Selector -->
-                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-                    <h3 class="font-black text-slate-200 text-md mb-3 flex items-center justify-between">
-                        <span><i class="fa-solid fa-shield-halved text-red-400 mr-2"></i>選擇你的對戰陀螺</span>
-                        <span class="text-xs font-normal text-slate-400">已贏局數: <strong id="winsCounter" class="text-amber-400 text-sm">0</strong> / 5</span>
-                    </h3>
-
-                    <!-- Scrollable Beyblade List -->
-                    <div id="beyDeckContainer" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
-                        <!-- Beyblades injected dynamically via JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT PANEL: Battle Arena Canvas & Dynamic Clash Screen (7 Cols) -->
-            <div class="lg:col-span-7 glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col items-center">
-                
-                <!-- Arena Header & Scoreboard -->
-                <div class="w-full flex justify-between items-center mb-4 bg-slate-900/90 p-3.5 rounded-xl border border-slate-800">
-                    <!-- Player Score -->
-                    <div class="flex items-center gap-3">
-                        <div id="playerAvatar" class="w-10 h-10 rounded-full border-2 border-cyan-400 flex items-center justify-center bg-slate-800">
-                            <span id="playerDeckIcon" class="text-lg">🐉</span>
-                        </div>
-                        <div>
-                            <div id="playerDeckName" class="font-black text-sm text-cyan-400">薯片龍</div>
-                            <div class="text-xs text-slate-400">玩家分數: <span id="playerMatchScore" class="font-extrabold text-white text-lg font-tech">0</span> / 4</div>
-                        </div>
-                    </div>
-
-                    <!-- VS Badge -->
-                    <div class="font-black text-slate-500 italic text-xl px-2">VS</div>
-
-                    <!-- Computer Score -->
-                    <div class="flex items-center gap-3 text-right">
-                        <div>
-                            <div id="cpuDeckName" class="font-black text-sm text-red-400">黑暗魔龍</div>
-                            <div class="text-xs text-slate-400">電腦分數: <span id="cpuMatchScore" class="font-extrabold text-white text-lg font-tech">0</span> / 4</div>
-                        </div>
-                        <div class="w-10 h-10 rounded-full border-2 border-red-500 flex items-center justify-center bg-slate-800">
-                            <span id="cpuDeckIcon" class="text-lg">👹</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Canvas Stadium Screen -->
-                <div class="relative w-full aspect-square max-w-[420px] mx-auto flex items-center justify-center my-2">
-                    <canvas id="stadiumCanvas" width="400" height="400" class="w-full h-full cursor-crosshair"></canvas>
-                    
-                    <!-- Announcement Overlay inside Canvas -->
-                    <div id="battleAnnouncer" class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center text-center p-4 transition-opacity duration-300 opacity-0">
-                        <div id="announcerText" class="text-2xl sm:text-3xl font-black text-yellow-300 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] animate-bounce">
-                            3, 2, 1 🚀 發射！
-                        </div>
-                        <div id="announcerSubtext" class="text-sm font-bold text-white mt-1 drop-shadow-md"></div>
-                    </div>
-                </div>
-
-                <!-- Battle Controls & Status -->
-                <div class="w-full mt-3 flex flex-col sm:flex-row gap-3">
-                    <button id="launchBattleBtn" onclick="startBeybladeMatch()" class="flex-1 py-4 bg-gradient-to-r from-red-600 via-amber-500 to-yellow-400 hover:brightness-110 text-slate-950 font-black rounded-xl text-lg shadow-xl shadow-red-600/30 transition transform active:scale-95 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-play"></i> 發射對戰！ (LET IT RIP!)
-                    </button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- QUIZ STATION MODAL -->
-    <div id="quizModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-3 sm:p-5 backdrop-blur-md">
-        <div class="max-w-3xl w-full glass-panel rounded-2xl p-5 sm:p-8 shadow-2xl border border-indigo-500/30 relative max-h-[92vh] flex flex-col justify-between">
-            
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-                <div>
-                    <h3 class="text-lg font-black text-indigo-400 flex items-center gap-2">
-                        <i class="fa-solid fa-graduation-cap"></i> 袁隆平文章理解題 
-                    </h3>
-                    <p class="text-xs text-slate-400">題目 <span id="currentQNum">1</span> / 12</p>
-                </div>
-                <button onclick="closeQuizModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <!-- Question Card Body -->
-            <div id="quizCardBody" class="flex-1 overflow-y-auto pr-2 space-y-4">
-                <!-- Question Text -->
-                <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800">
-                    <p id="quizQuestionText" class="text-base sm:text-lg font-bold text-slate-100 leading-snug">
-                        載入題目中...
-                    </p>
-                </div>
-
-                <!-- Answer Options Grid -->
-                <div id="quizOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Options injected via JS -->
-                </div>
-
-                <!-- Hint / Feedback Message Container -->
-                <div id="quizFeedbackBox" class="hidden p-3.5 rounded-xl text-xs sm:text-sm font-semibold transition">
-                </div>
-            </div>
-
-            <!-- Quiz Station Footer Controls -->
-            <div class="border-t border-slate-800 pt-4 mt-4 flex justify-between items-center">
-                <button id="prevQBtn" onclick="navigateQuiz(-1)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-lg text-xs transition">
-                    <i class="fa-solid fa-chevron-left mr-1"></i> 上一題
-                </button>
-
-                <span id="quizStatusIndicator" class="text-xs text-slate-400 font-semibold"></span>
-
-                <button id="nextQBtn" onclick="navigateQuiz(1)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs transition">
-                    下一題 <i class="fa-solid fa-chevron-right ml-1"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- GRAND CHAMPION VICTORY & FIREWORKS MODAL -->
-    <div id="victoryModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 flex flex-col items-center justify-center p-4 backdrop-blur-md">
-        <!-- Canvas Fireworks Background -->
-        <canvas id="fireworksCanvas" class="absolute inset-0 pointer-events-none w-full h-full z-0"></canvas>
         
-        <div class="relative z-10 max-w-xl w-full glass-panel rounded-3xl p-8 shadow-2xl border border-yellow-500/50 text-center space-y-5">
-            <div class="w-24 h-24 mx-auto bg-gradient-to-tr from-yellow-400 via-amber-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl shadow-yellow-500/50 animate-bounce">
-                <i class="fa-solid fa-trophy text-5xl text-slate-950"></i>
-            </div>
-
-            <div>
-                <h2 class="text-3xl sm:text-4xl font-black bg-gradient-to-r from-yellow-300 via-amber-400 to-red-400 bg-clip-text text-transparent">
-                    🎉 恭喜！總冠軍誕生！
-                </h2>
-                <p class="text-slate-300 text-sm mt-2">
-                    <span id="winStudentInfo" class="font-bold text-cyan-400">--</span> 成功贏得 5 局陀螺對決，並完成全數 12 條閱讀理解試煉！
-                </p>
-            </div>
-
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-left text-xs space-y-2 text-slate-300">
-                <div class="flex justify-between">
-                    <span>🏆 總戰績：</span>
-                    <strong class="text-yellow-400">5 勝 0 敗</strong>
-                </div>
-                <div class="flex justify-between">
-                    <span>📖 閱讀問題完全解答：</span>
-                    <strong class="text-green-400">12 / 12 正確</strong>
-                </div>
-                <div class="flex justify-between">
-                    <span>🌟 堅毅精神評價：</span>
-                    <strong class="text-amber-300">如同袁隆平爺爺般持之以恆！</strong>
-                </div>
-            </div>
-
-            <button onclick="location.reload()" class="w-full py-4 bg-gradient-to-r from-yellow-400 via-amber-500 to-red-500 hover:brightness-110 text-slate-950 font-black rounded-xl shadow-lg transition text-lg">
-                重新挑戰 / 再次對決 <i class="fa-solid fa-rotate-right ml-2"></i>
-            </button>
+        <div class="bg-gray-800/80 border border-gray-700/60 rounded-lg px-3 py-1.5 flex items-center gap-2">
+          <i class="fa-solid fa-trophy text-amber-400"></i>
+          <span class="text-gray-300">局數勝利：<strong id="display-wins" class="text-amber-400 font-mono font-bold">0</strong>/5</span>
         </div>
+
+        <div class="bg-gray-800/80 border border-gray-700/60 rounded-lg px-3 py-1.5 flex items-center gap-2">
+          <i class="fa-solid fa-circle-check text-emerald-400"></i>
+          <span class="text-gray-300">答對題數：<strong id="display-quiz-score" class="text-emerald-400 font-mono font-bold">0</strong>/12</span>
+        </div>
+      </div>
+
+      <!-- Controls: Audio Toggle & Teacher Security Bell -->
+      <div class="flex items-center gap-3">
+        <button id="bgm-toggle-btn" class="p-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 hover:text-white transition flex items-center justify-center" title="開啟/靜音 音樂及音效">
+          <i id="bgm-icon" class="fa-solid fa-volume-xmark text-lg text-rose-400"></i>
+        </button>
+
+        <!-- Animated Teacher Secret Bell Icon -->
+        <button id="admin-bell-btn" class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition flex items-center justify-center relative group" title="教師專用管理面板 (需密碼)">
+          <i class="fa-solid fa-bell text-xl animate-bell"></i>
+          <span class="absolute -top-1 -right-1 flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Area -->
+  <main class="max-w-7xl mx-auto w-full p-4 flex-1 flex flex-col gap-6">
+
+    <!-- Tab Switching Navigation -->
+    <div id="main-nav-tabs" class="hidden flex border-b border-gray-800 gap-2">
+      <button data-tab="tab-arena" class="nav-tab active px-5 py-2.5 text-sm font-bold rounded-t-xl bg-blue-600 text-white flex items-center gap-2 transition">
+        <i class="fa-solid fa-burst text-amber-300"></i> 陀螺對戰競技場
+      </button>
+      <button data-tab="tab-garage" class="nav-tab px-5 py-2.5 text-sm font-bold rounded-t-xl bg-gray-800 text-gray-400 hover:text-white flex items-center gap-2 transition">
+        <i class="fa-solid fa-dharmachakra text-blue-400"></i> 陀螺整備庫
+      </button>
+      <button data-tab="tab-quiz" class="nav-tab px-5 py-2.5 text-sm font-bold rounded-t-xl bg-gray-800 text-gray-400 hover:text-white flex items-center gap-2 transition relative">
+        <i class="fa-solid fa-book-open text-emerald-400"></i> 袁隆平故事題庫
+        <span id="quiz-tab-badge" class="ml-1 px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full font-mono">0/12</span>
+      </button>
     </div>
 
-    <!-- TEACHER AUTHENTICATION MODAL -->
-    <div id="teacherAuthModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="max-w-sm w-full glass-panel rounded-2xl p-6 border border-amber-500/40 text-center space-y-4">
-            <div class="w-12 h-12 mx-auto bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center text-xl">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <h3 class="text-lg font-black text-white">教師保密管理驗證</h3>
-            <p class="text-xs text-slate-400">請輸入教師專屬密碼以解鎖數據分析與 Excel 匯出功能。</p>
+    <!-- TAB 1: BEYBLADE ARENA -->
+    <section id="tab-arena" class="tab-content flex-1 flex flex-col lg:flex-row gap-6">
+      
+      <!-- Left: Match Info & Beyblade Select Quick Bar -->
+      <div class="lg:w-1/3 flex flex-col gap-4">
+        <!-- Match Progress Card -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+            <h2 class="font-tech text-base font-bold text-amber-400 flex items-center gap-2">
+              <i class="fa-solid fa-trophy"></i> 第 <span id="current-round-num" class="text-xl text-white font-mono">1</span> 局對決 (先得4分獲勝)
+            </h2>
+            <span class="text-xs px-2.5 py-1 bg-blue-900/60 border border-blue-700/50 text-blue-300 rounded-full font-mono">目標：勝出 5 局</span>
+          </div>
 
-            <input type="password" id="teacherPasswordInput" placeholder="請輸入密碼" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-center text-white font-bold focus:outline-none focus:border-amber-500">
-
-            <div class="flex gap-2">
-                <button onclick="closeTeacherAuthModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition">
-                    取消
-                </button>
-                <button onclick="verifyTeacherPassword()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs transition">
-                    解鎖驗證
-                </button>
+          <!-- Live Match Scoreboard -->
+          <div class="grid grid-cols-2 gap-3 text-center my-1">
+            <div class="bg-gray-800/80 rounded-xl p-3 border border-blue-500/30">
+              <div class="text-xs text-gray-400 font-bold mb-1">玩家 (你)</div>
+              <div id="player-beyblade-name" class="text-xs font-bold text-blue-400 truncate mb-1">薯片龍</div>
+              <div id="player-match-score" class="text-3xl font-black font-mono text-blue-400">0</div>
             </div>
+            <div class="bg-gray-800/80 rounded-xl p-3 border border-rose-500/30">
+              <div class="text-xs text-gray-400 font-bold mb-1">電腦對手</div>
+              <div id="ai-beyblade-name" class="text-xs font-bold text-rose-400 truncate mb-1">黑煞暴龍</div>
+              <div id="ai-match-score" class="text-3xl font-black font-mono text-rose-400">0</div>
+            </div>
+          </div>
+
+          <!-- Scoring Rules Legend -->
+          <div class="bg-gray-950/80 rounded-xl p-3 text-[11px] text-gray-400 grid grid-cols-2 gap-1.5 border border-gray-800/80">
+            <div><span class="text-amber-400 font-bold">極限勝利：</span>3 分</div>
+            <div><span class="text-rose-400 font-bold">擊飛勝利：</span>2 分</div>
+            <div><span class="text-purple-400 font-bold">爆裂勝利：</span>2 分</div>
+            <div><span class="text-emerald-400 font-bold">迴旋勝利：</span>1 分</div>
+          </div>
+
+          <!-- Launch Battle Button -->
+          <button id="launch-battle-btn" class="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:from-amber-400 hover:to-red-500 text-white font-tech font-bold text-lg rounded-xl shadow-lg shadow-orange-500/25 active:scale-95 transition flex items-center justify-center gap-3">
+            <i class="fa-solid fa-play text-xl animate-pulse"></i> 發射陀螺對戰！ (3, 2, 1 GO SHOOT!)
+          </button>
         </div>
+
+        <!-- Selected Beyblade Quick Card -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-gray-300">出戰陀螺選擇</h3>
+            <button id="goto-garage-btn" class="text-xs text-blue-400 hover:underline">去裝備庫解鎖更多 &rarr;</button>
+          </div>
+
+          <div id="quick-selected-card" class="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/40 rounded-xl p-3 flex items-center gap-3">
+            <div id="quick-beyblade-preview" class="w-14 h-14 rounded-full bg-gray-800 border-2 border-blue-400 flex items-center justify-center text-2xl shadow-inner">
+              🐉
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span id="quick-beyblade-title" class="font-bold text-sm text-white truncate">薯片龍</span>
+                <span id="quick-beyblade-speed" class="px-1.5 py-0.5 text-[10px] bg-blue-500/20 text-blue-300 rounded border border-blue-500/30">慢速</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1 text-[11px] text-gray-300 mt-1">
+                <div>攻擊: <span id="quick-stat-atk" class="text-amber-400 font-mono">45</span></div>
+                <div>防守: <span id="quick-stat-def" class="text-blue-400 font-mono">60</span></div>
+                <div>重量: <span id="quick-stat-wt" class="text-emerald-400 font-mono">50</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Combat Log -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-xl flex-1 flex flex-col min-h-[160px]">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-list-ul text-amber-500"></i> 對戰實況記錄
+          </h3>
+          <div id="combat-log" class="flex-1 bg-gray-950 rounded-xl p-3 font-mono text-xs text-gray-300 overflow-y-auto space-y-1.5 max-h-[180px] border border-gray-800/80">
+            <div class="text-gray-500 italic">準備就緒，請點擊上方按鈕發射陀螺對戰！</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Beyblade Physics Stadium Canvas -->
+      <div class="lg:w-2/3 bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-xl flex flex-col items-center justify-center relative min-h-[420px]">
+        <div class="absolute top-4 left-4 z-10 bg-gray-950/80 border border-gray-800 rounded-lg px-3 py-1.5 text-xs font-mono text-gray-400 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>競技場：Xtreme Beystadium</span>
+        </div>
+
+        <!-- Dynamic Visual Canvas -->
+        <div class="relative w-full max-w-[500px] aspect-square flex items-center justify-center">
+          <canvas id="stadium-canvas" width="500" height="500" class="w-full h-full rounded-full stadium-shadow border-4 border-gray-800 bg-gray-950 cursor-crosshair"></canvas>
+          
+          <!-- Clash Overlay Status -->
+          <div id="stadium-overlay-text" class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-0 transition-opacity duration-300">
+            <span id="clash-result-banner" class="px-6 py-3 bg-amber-500/90 text-gray-950 font-tech font-black text-2xl rounded-2xl shadow-2xl border-2 border-white transform scale-110">
+              極限勝利！+3
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: BEYBLADE GARAGE (解鎖與選擇陀螺) -->
+    <section id="tab-garage" class="tab-content hidden flex-1 flex flex-col gap-6">
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-gray-800 pb-4 mb-6">
+          <div>
+            <h2 class="text-xl font-bold font-tech text-white flex items-center gap-2">
+              <i class="fa-solid fa-dharmachakra text-amber-400"></i> 爆旋陀螺解鎖整備庫
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">答對袁隆平故事問題可解鎖更高速、強力的爆旋陀螺！</p>
+          </div>
+          <div class="bg-gray-800 border border-gray-700 rounded-xl px-4 py-2 text-sm flex items-center gap-3">
+            <span class="text-gray-300">答對題數解鎖：</span>
+            <span class="text-emerald-400 font-bold font-mono text-lg"><span id="garage-correct-count">0</span> / 12</span>
+          </div>
+        </div>
+
+        <!-- Beyblades Grid -->
+        <div id="beyblades-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Dynamically Rendered Cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: YUAN LONGPING STORY QUIZ (故事題目與作答) -->
+    <section id="tab-quiz" class="tab-content hidden flex-1 flex flex-col gap-6">
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl flex flex-col gap-6">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-gray-800 pb-4">
+          <div>
+            <h2 class="text-xl font-bold font-tech text-white flex items-center gap-2">
+              <i class="fa-solid fa-book-open text-emerald-400"></i> 袁隆平故事理解題庫 (全 12 題)
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">閱讀【雜交水稻之父～袁隆平】故事，回答問題解鎖最強爆旋陀螺！答錯會提供作答提示。</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-3 py-1.5 bg-blue-900/40 border border-blue-500/30 text-blue-300 rounded-lg">4題解鎖：鯊魚/鳳凰 (快速)</span>
+            <span class="px-3 py-1.5 bg-amber-900/40 border border-amber-500/30 text-amber-300 rounded-lg">8題解鎖：神杖/天馬/鈷藍龍 (超快速+火花)</span>
+          </div>
+        </div>
+
+        <!-- Questions List Container -->
+        <div id="questions-container" class="space-y-4">
+          <!-- Dynamically populated question cards -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: Login Modal (班別 & 學號) -->
+  <div id="login-modal" class="fixed inset-0 z-50 bg-gray-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative flex flex-col gap-5">
+      <div class="text-center">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-amber-500 p-0.5 mx-auto mb-3 shadow-lg shadow-blue-500/30">
+          <div class="w-full h-full bg-gray-900 rounded-[14px] flex items-center justify-center">
+            <i class="fa-solid fa-dharmachakra text-amber-400 text-3xl animate-spin" style="animation-duration: 10s;"></i>
+          </div>
+        </div>
+        <h2 class="text-2xl font-bold font-tech text-white">爆旋陀螺故事挑戰賽</h2>
+        <p class="text-xs text-gray-400 mt-1">請先輸入「班別」與「學號」開始遊戲</p>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">學生班別 (例如：4A, 5B, 6C)</label>
+          <input type="text" id="input-class" required placeholder="請輸入班別" class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">學生學號 (例如：01, 15, 28)</label>
+          <input type="text" id="input-student-no" required placeholder="請輸入學號" class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
+        </div>
+
+        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 active:scale-95 transition mt-2">
+          進入對戰戰場 &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Game Tutorial / Instructions Modal -->
+  <div id="tutorial-modal" class="fixed inset-0 z-50 bg-gray-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 md:p-8 max-w-xl w-full shadow-2xl relative flex flex-col gap-5">
+      <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+        <h3 class="text-xl font-bold text-amber-400 font-tech flex items-center gap-2">
+          <i class="fa-solid fa-gamepad"></i> 遊戲對戰玩法說明
+        </h3>
+        <button id="skip-tutorial-btn" class="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg text-xs transition">
+          略過 (Skip) &rarr;
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-gray-300 leading-relaxed max-h-[60vh] overflow-y-auto pr-1">
+        <div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700/50">
+          <p class="font-bold text-blue-400 mb-1">1. 陀螺對戰規則：</p>
+          <p>與電腦進行陀螺碰撞對決，每局先取得 <strong class="text-amber-400">4 分</strong> 者獲勝。勝利方式包括：極限勝利 (+3分)、擊飛勝利 (+2分)、爆裂勝利 (+2分)、迴旋勝利 (+1分)。</p>
+        </div>
+
+        <div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700/50">
+          <p class="font-bold text-emerald-400 mb-1">2. 答題解鎖強大陀螺：</p>
+          <p>開局可選擇「薯片龍、暴龍」(慢速)。對戰輸了可前往題庫回答【袁隆平故事理解題】：</p>
+          <ul class="list-disc list-inside mt-1 space-y-1 text-gray-400">
+            <li>答對 <strong class="text-blue-300">4 題</strong>：解鎖「鯊魚、鳳凰」(快速)</li>
+            <li>答對 <strong class="text-amber-300">8 題</strong>：解鎖「神杖、天馬、鈷藍龍」(超級快速 + 火花視覺效果)</li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700/50">
+          <p class="font-bold text-amber-400 mb-1">3. 贏得 5 局終極大勝條件：</p>
+          <p>玩家需贏得 <strong class="text-amber-400">5 局對決</strong> 方可通關。注意：勝出第 5 局時，學生必須答對全部 <strong class="text-emerald-400">12 條問題</strong> (包含補答正確) 才能觸發煙花通關畫面！</p>
+        </div>
+      </div>
+
+      <button id="close-tutorial-btn" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition">
+        明白，開始對戰！
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Teacher Admin Dashboard & Password Modal -->
+  <div id="admin-modal" class="fixed inset-0 z-50 bg-gray-950/95 backdrop-blur-lg flex items-center justify-center p-4 hidden">
+    <!-- Passcode Screen -->
+    <div id="admin-passcode-view" class="bg-gray-900 border border-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl flex flex-col gap-4 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto text-xl">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-white">教師保密驗證</h3>
+        <p class="text-xs text-gray-400 mt-1">請輸入管理員密碼解鎖教師數據面板</p>
+      </div>
+
+      <input type="password" id="input-admin-passcode" placeholder="請輸入密碼" class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-white text-center font-mono focus:outline-none focus:border-amber-500">
+
+      <div id="admin-passcode-error" class="text-xs text-rose-400 hidden">密碼錯誤！請重新輸入。</div>
+
+      <div class="flex gap-2">
+        <button id="cancel-admin-btn" class="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-bold transition">取消</button>
+        <button id="submit-admin-btn" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-gray-950 rounded-xl text-xs font-bold transition">解鎖驗證</button>
+      </div>
     </div>
 
-    <!-- TEACHER DASHBOARD & EXCEL EXPORT MODAL -->
-    <div id="teacherDashboardModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-3 sm:p-6 backdrop-blur-md">
-        <div class="max-w-5xl w-full glass-panel rounded-2xl p-5 sm:p-8 shadow-2xl border border-amber-500/30 flex flex-col max-h-[92vh]">
-            
-            <!-- Dashboard Header -->
-            <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-4">
+    <!-- Admin Dashboard Main View (Unlocked) -->
+    <div id="admin-dashboard-view" class="bg-gray-900 border border-gray-800 rounded-3xl p-6 max-w-5xl w-full shadow-2xl hidden flex-col gap-5 max-h-[90vh] overflow-hidden">
+      <!-- Admin Header -->
+      <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold rounded-lg font-mono">
+            保密解鎖 (ADMIN)
+          </div>
+          <h3 class="text-lg font-bold text-white font-tech">教師全班答題數據與分析管理面板</h3>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="export-excel-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-600/20 transition flex items-center gap-2">
+            <i class="fa-solid fa-file-excel text-sm"></i> 匯出 Excel (.xlsx) 報告
+          </button>
+          <button id="close-admin-dashboard" class="text-gray-400 hover:text-white text-xl px-2">&times;</button>
+        </div>
+      </div>
+
+      <!-- Live Firebase Sync Info Banner -->
+      <div class="bg-gray-800/80 border border-gray-700 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 text-xs">
+        <div>
+          <span class="text-gray-400">雲端資料庫狀態：</span>
+          <span class="text-emerald-400 font-bold font-mono">YuanLongping (Firebase Realtime)</span>
+        </div>
+        <div>
+          <span class="text-gray-400">總記錄學生數：</span>
+          <span id="admin-total-students" class="text-amber-400 font-bold font-mono text-sm">0</span> 位
+        </div>
+        <div>
+          <span class="text-gray-400">機制：</span>
+          <span class="text-blue-300 font-bold">鎖定首答成績 (First-Attempt Lock)</span>
+        </div>
+      </div>
+
+      <!-- Students Live Progress Table -->
+      <div class="flex-1 overflow-y-auto border border-gray-800 rounded-2xl bg-gray-950">
+        <table class="w-full text-left text-xs text-gray-300 border-collapse">
+          <thead class="bg-gray-900 text-gray-400 uppercase font-mono border-b border-gray-800 sticky top-0">
+            <tr>
+              <th class="p-3">學生 (班別-學號)</th>
+              <th class="p-3">勝出局數</th>
+              <th class="p-3">首答正確數</th>
+              <th class="p-3">最終正答數</th>
+              <th class="p-3">首答正確率</th>
+              <th class="p-3">各題首答明細 (1-12)</th>
+            </tr>
+          </thead>
+          <tbody id="admin-students-tbody" class="divide-y divide-gray-800/60 font-mono">
+            <tr>
+              <td colspan="6" class="p-6 text-center text-gray-500 italic">載入學生數據中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Knowledge Layer & Mistake Reason Analysis Preview -->
+      <div class="bg-gray-950 border border-gray-800 rounded-2xl p-4 max-h-[160px] overflow-y-auto text-xs text-gray-400 space-y-2">
+        <div class="font-bold text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-chart-pie"></i> 12 條問題知識層面及答錯原因預設分析架構
+        </div>
+        <p class="text-[11px] text-gray-500 leading-relaxed">
+          匯出的 Excel (.xlsx) 將包含「學生總體成績」、「各題作答記錄 (鎖定首答)」、「知識層面與答錯原因分析」三個完整分頁，方便教師分析全班學習表現。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: Fireworks Victory Modal (勝出5局及完成全部12題) -->
+  <div id="victory-modal" class="fixed inset-0 z-50 bg-gray-950/95 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+    <!-- Fireworks Canvas Layer -->
+    <canvas id="fireworks-canvas" class="absolute inset-0 pointer-events-none w-full h-full z-0"></canvas>
+
+    <div class="relative z-10 bg-gray-900/90 border-2 border-amber-500/50 rounded-3xl p-8 max-w-lg w-full shadow-2xl text-center flex flex-col items-center gap-5">
+      <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-400 via-orange-500 to-red-500 p-1 shadow-2xl shadow-amber-500/50 animate-bounce">
+        <div class="w-full h-full bg-gray-950 rounded-full flex items-center justify-center text-4xl">
+          🏆
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-3xl font-black font-tech bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 bg-clip-text text-transparent">
+          恭喜勝出爆旋陀螺對決！
+        </h2>
+        <p class="text-sm text-gray-300 mt-2">
+          你成功贏得 <span class="text-amber-400 font-bold font-mono text-base">5</span> 局戰術對決，並完整答對全部 <span class="text-emerald-400 font-bold font-mono text-base">12</span> 條袁隆平故事問題！
+        </p>
+      </div>
+
+      <div class="bg-gray-950/80 border border-gray-800 rounded-2xl p-4 w-full grid grid-cols-2 gap-3 text-xs text-gray-300">
+        <div class="bg-gray-900/80 p-2.5 rounded-xl border border-gray-800">
+          <div class="text-gray-400">獲勝學生</div>
+          <div id="victory-user-id" class="font-bold text-amber-400 font-mono text-sm">--</div>
+        </div>
+        <div class="bg-gray-900/80 p-2.5 rounded-xl border border-gray-800">
+          <div class="text-gray-400">榮譽稱號</div>
+          <div class="font-bold text-emerald-400 text-xs">雜交水稻與陀螺大師</div>
+        </div>
+      </div>
+
+      <button id="replay-game-btn" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-gray-950 font-tech font-black text-lg rounded-xl shadow-xl transition">
+        再次挑戰 / 繼續遊玩
+      </button>
+    </div>
+  </div>
+
+  <!-- Firebase JS Modules -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /* =========================================================================
+       1. GAME DATA & QUESTIONS CONFIGURATION (STRICTLY FROM ATTACHED DOC)
+       ========================================================================= */
+    const QUESTIONS = [
+      {
+        id: 1,
+        question: "1. 袁隆平被稱為什麼？",
+        options: ["A. 雜交水稻之父", "B. 太空科學家", "C. 數學家", "D. 畫家"],
+        answer: 0,
+        hint: "提示：他終生研究水稻與糧食作物，解決了數億人的吃飯問題。",
+        knowledgeLayer: "基礎事實記憶",
+        wrongReason: "未掌握袁隆平的成就名稱，混淆了科學領域。"
+      },
+      {
+        id: 2,
+        question: "2. 袁隆平小時候為什麼立志學農？",
+        options: [
+          "A. 因為家人要求他學農",
+          "B. 因為一年級參觀郊區植物園，被美麗的花草樹木和農作物吸引",
+          "C. 因為他不喜歡讀書",
+          "D. 因為老師強迫他選擇"
+        ],
+        answer: 1,
+        hint: "提示：回想他小學一年級時去郊區參觀植物園的經歷與感受。",
+        knowledgeLayer: "因果動機理解",
+        wrongReason: "未留意故事中關於小學參觀植物園萌生志向的細節記述。"
+      },
+      {
+        id: 3,
+        question: "3. 袁隆平大學畢業後被分配到哪裡工作？",
+        options: [
+          "A. 北京的研究機構",
+          "B. 湖南安江農業學校當老師和做研究",
+          "C. 上海的工廠",
+          "D. 外國的大學"
+        ],
+        answer: 1,
+        hint: "提示：那是一間位於湖南省的農業學校，他在那裏兼任教學與試驗。",
+        knowledgeLayer: "履歷事實細節",
+        wrongReason: "誤將工作地點記成大城市或國外機構。"
+      },
+      {
+        id: 4,
+        question: "4. 什麼事情讓袁隆平決心研究高產水稻？",
+        options: [
+          "A. 他想出名",
+          "B. 他想賺很多錢",
+          "C. 老師吩咐他做研究",
+          "D. 他目睹飢荒，看到人們因缺糧受苦"
+        ],
+        answer: 3,
+        hint: "提示：看到身邊的人因為沒有糧食吃而陷入困境，觸動了他的慈悲心。",
+        knowledgeLayer: "情感與動機推論",
+        wrongReason: "誤以為研究是出於個人功利或被動指令，忽略了人文關懷背景。"
+      },
+      {
+        id: 5,
+        question: "5. 袁隆平在田裡發現一株特別的水稻時，那株水稻有什麼特點？",
+        options: [
+          "A. 葉子特別綠",
+          "B. 穗大粒多，有二百多粒穀粒",
+          "C. 長得特別矮",
+          "D. 沒有結出穀粒"
+        ],
+        answer: 1,
+        hint: "提示：這株水稻的稻穗特別飽滿，結出的稻穀數量遠超普通水稻。",
+        knowledgeLayer: "關鍵細節觀察",
+        wrongReason: "對特別水稻的形態特徵（穗大粒多）缺乏精確記憶。"
+      },
+      {
+        id: 6,
+        question: "6. 袁隆平的研究團隊在哪裡找到重要的野生雄性不育水稻「野敗」？",
+        options: ["A. 北京", "B. 湖南安江", "C. 海南島", "D. 上海"],
+        answer: 2,
+        hint: "提示：那是一個氣候溫暖、適合水稻生長的南方島嶼。",
+        knowledgeLayer: "地理位置記憶",
+        wrongReason: "混淆了研究團隊尋獲關鍵野株「野敗」的特質地點海南島。"
+      },
+      {
+        id: 7,
+        question: "7. 為了找到雄性不育水稻，袁隆平做了什麼？",
+        options: [
+          "A. 只在實驗室裡看顯微鏡",
+          "B. 每天在烈日下用放大鏡一株一株檢查稻穗",
+          "C. 請很多人幫忙，自己不勞動",
+          "D. 只看外國書本就成功"
+        ],
+        answer: 1,
+        hint: "提示：他親自走進稻田，不畏酷熱，用微小的觀察工具耐心尋找。",
+        knowledgeLayer: "行為過程與態度理解",
+        wrongReason: "未能理解科研實踐中的親歷親為與辛勤付出。"
+      },
+      {
+        id: 8,
+        question: "8. 袁隆平成功研發出雜交水稻後，對中國有什麼重要影響？",
+        options: [
+          "A. 讓水稻產量大幅提高，幫助解決糧食問題",
+          "B. 讓所有人都不需要種田",
+          "C. 讓水稻變得不能食用",
+          "D. 讓農民都不想再工作"
+        ],
+        answer: 0,
+        hint: "提示：最直接的成果是糧食數量增加，讓更多人能吃飽飯。",
+        knowledgeLayer: "社會影響分析",
+        wrongReason: "對科研成果帶來的國家級糧食安全效益缺乏客觀認知。"
+      },
+      {
+        id: 9,
+        question: "9. 袁隆平研發雜交水稻成功後，對世界有什麼重要貢獻？",
+        options: [
+          "A. 讓雜交水稻技術只留在中國，不給其他國家",
+          "B. 幫助亞洲、非洲等地解決飢餓問題，並分享種植技術",
+          "C. 讓所有人都不需要再種水稻",
+          "D. 把技術賣給外國賺很多錢後就停止研究"
+        ],
+        answer: 1,
+        hint: "提示：他的胸懷無國界，主動將先進技術推廣至世界其他貧困或缺乏糧食的地區。",
+        knowledgeLayer: "全球視野與貢獻",
+        wrongReason: "缺乏無私分享與全球人道主義貢獻概念。"
+      },
+      {
+        id: 10,
+        question: "10. 袁隆平為了找到有用的水稻植株，最能顯示他堅毅精神的做法是什麼？",
+        options: [
+          "A. 只在家裡看書，等結果自動出現",
+          "B. 請別人代勞，自己休息",
+          "C. 每天頂著烈日走進稻田，一株一株仔細檢查",
+          "D. 發現一次失敗就馬上停止研究"
+        ],
+        answer: 2,
+        hint: "提示：堅毅意味著不怕辛苦、持之以恆地在艱苦環境下親自檢查。",
+        knowledgeLayer: "品格價值提煉",
+        wrongReason: "未能精準識別「堅持不懈、不怕艱苦」的堅毅品質表現。"
+      },
+      {
+        id: 11,
+        question: "11. 如果你在學習新技能（例如學騎單車、學樂器）時，一次又一次失敗，你應該怎麼做才最像袁隆平的堅毅精神？",
+        options: [
+          "A. 立刻放棄，說「我做不到」",
+          "B. 只怪別人沒有幫你",
+          "C. 繼續練習，每次失敗後找出問題再試一次",
+          "D. 躲起來不練習，等別人替你完成"
+        ],
+        answer: 2,
+        hint: "提示：面對挫折不放棄，而是冷靜分析原因並繼續嘗試。",
+        knowledgeLayer: "情境遷移與生活實踐",
+        wrongReason: "缺乏正向面對挫折與自我檢討改善的解決問題思維。"
+      },
+      {
+        id: 12,
+        question: "12. 當你在完成功課或參加比賽時遇到困難，覺得很想放棄，以下哪個做法最能實踐堅毅精神？",
+        options: [
+          "A. 把困難丟給同學或父母處理",
+          "B. 抱怨「為什麼這麼難」，然後生氣不做",
+          "C. 馬上停止，改做其他容易的事",
+          "D. 告訴自己「再努力一下」，一步一步克服問題"
+        ],
+        answer: 3,
+        hint: "提示：堅毅的精神在於自我鼓勵，咬牙堅持並分階段解決困難。",
+        knowledgeLayer: "情感態度與自我管理",
+        wrongReason: "遇到挫折容易產生推卸責任或逃避心理，缺乏意志力。"
+      }
+    ];
+
+    /* =========================================================================
+       2. BEYBLADES DATA CONFIGURATION
+       ========================================================================= */
+    const BEYBLADES = [
+      {
+        id: 'chip_dragon',
+        name: '薯片龍 (Chip Dragon)',
+        tier: 0,
+        reqCorrect: 0,
+        speedType: 'slow', // 慢速
+        speedMultiplier: 1.0,
+        sparkLevel: 'low',
+        color: '#f59e0b',
+        secondaryColor: '#ea580c',
+        icon: '🐉',
+        attack: 45,
+        defense: 60,
+        weight: 50,
+        description: '初級慢速防禦型陀螺，平衡穩定。'
+      },
+      {
+        id: 'tyranno',
+        name: '暴龍 (Tyranno)',
+        tier: 0,
+        reqCorrect: 0,
+        speedType: 'slow', // 慢速
+        speedMultiplier: 1.1,
+        sparkLevel: 'low',
+        color: '#dc2626',
+        secondaryColor: '#111827',
+        icon: '🦖',
+        attack: 58,
+        defense: 42,
+        weight: 52,
+        description: '初級慢速攻擊型陀螺，咬合力強。'
+      },
+      {
+        id: 'shark',
+        name: '鯊魚 (Shark Edge)',
+        tier: 1,
+        reqCorrect: 4,
+        speedType: 'fast', // 快速
+        speedMultiplier: 2.2,
+        sparkLevel: 'medium',
+        color: '#06b6d4',
+        secondaryColor: '#1e40af',
+        icon: '🦈',
+        attack: 75,
+        defense: 50,
+        weight: 62,
+        description: '中級快速切裂型陀螺，衝擊力高。'
+      },
+      {
+        id: 'phoenix',
+        name: '鳳凰 (Phoenix Wing)',
+        tier: 1,
+        reqCorrect: 4,
+        speedType: 'fast', // 快速
+        speedMultiplier: 2.3,
+        sparkLevel: 'medium',
+        color: '#e11d48',
+        secondaryColor: '#fbbf24',
+        icon: '🦅',
+        attack: 72,
+        defense: 65,
+        weight: 66,
+        description: '中級快速重擊型陀螺，迴旋強勁。'
+      },
+      {
+        id: 'wand',
+        name: '神杖 (Wizard Rod)',
+        tier: 2,
+        reqCorrect: 8,
+        speedType: 'super_fast', // 超級快速
+        speedMultiplier: 3.5,
+        sparkLevel: 'high',
+        color: '#eab308',
+        secondaryColor: '#a855f7',
+        icon: '🪄',
+        attack: 82,
+        defense: 90,
+        weight: 78,
+        description: '高級超快速持久型陀螺，碰撞伴隨火花！'
+      },
+      {
+        id: 'pegasus',
+        name: '天馬 (Pegasus)',
+        tier: 2,
+        reqCorrect: 8,
+        speedType: 'super_fast', // 超級快速
+        speedMultiplier: 3.6,
+        sparkLevel: 'high',
+        color: '#38bdf8',
+        secondaryColor: '#f43f5e',
+        icon: '🦄',
+        attack: 92,
+        defense: 72,
+        weight: 76,
+        description: '高級超快速爆發型陀螺，強光與火花碰撞！'
+      },
+      {
+        id: 'cobalt_dragon',
+        name: '鈷藍龍 (Cobalt Dragoon)',
+        tier: 2,
+        reqCorrect: 8,
+        speedType: 'super_fast', // 超級快速
+        speedMultiplier: 3.8,
+        sparkLevel: 'high',
+        color: '#1d4ed8',
+        secondaryColor: '#0f172a',
+        icon: '🐲',
+        attack: 96,
+        defense: 80,
+        weight: 82,
+        description: '終極超快速左迴旋陀螺，滿火花震撼效果！'
+      }
+    ];
+
+    /* =========================================================================
+       3. GLOBAL APP STATE & FIREBASE SETUP
+       ========================================================================= */
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'YuanLongping';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' 
+      ? JSON.parse(__firebase_config)
+      : {
+          apiKey: "",
+          authDomain: "yuanlongping-app.firebaseapp.com",
+          projectId: "yuanlongping-app",
+          storageBucket: "yuanlongping-app.appspot.com",
+          messagingSenderId: "123456789",
+          appId: "1:123456789:web:abcdef"
+        };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let userClass = '';
+    let userStudentNo = '';
+    let docId = '';
+
+    // Student Data State
+    let studentData = {
+      userClass: '',
+      userStudentNo: '',
+      winsCount: 0,
+      currentRound: 1,
+      selectedBeybladeId: 'chip_dragon',
+      answers: {}, // questionId -> { firstSelected: number, isFirstCorrect: boolean, currentSelected: number, isCurrentCorrect: boolean }
+      updatedAt: Date.now()
+    };
+
+    let allStudentsCloudRecords = [];
+
+    /* Audio Synthesizer Engine (Web Audio API) */
+    let audioCtx = null;
+    let isMuted = true;
+    let bgmOscillator = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSoundEffect(type) {
+      if (isMuted) return;
+      initAudio();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'clash') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'wrong') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(160, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'victory') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(554.37, now + 0.12);
+        osc.frequency.setValueAtTime(659.25, now + 0.24);
+        osc.frequency.setValueAtTime(880, now + 0.36);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
+      }
+    }
+
+    /* =========================================================================
+       4. INITIALIZATION & FIREBASE AUTH
+       ========================================================================= */
+    async function initAuth() {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          const userCredential = await signInWithCustomToken(auth, __initial_auth_token);
+          currentUser = userCredential.user;
+        } else {
+          const userCredential = await signInAnonymously(auth);
+          currentUser = userCredential.user;
+        }
+      } catch (err) {
+        console.warn("Firebase Auth fallback:", err);
+      }
+    }
+
+    /* Firebase Firestore Listener for All Records (Public Path Rule 1) */
+    function subscribeCloudRecords() {
+      if (!currentUser) return;
+      const recordsCol = collection(db, 'artifacts', appId, 'public', 'data', 'yuanlongping_records');
+      
+      onSnapshot(recordsCol, (snapshot) => {
+        allStudentsCloudRecords = [];
+        snapshot.forEach(docSnap => {
+          allStudentsCloudRecords.push(docSnap.data());
+        });
+        updateAdminTableUI();
+      }, (err) => {
+        console.error("Firestore snapshot error:", err);
+      });
+    }
+
+    /* Save / Sync Current Student Record */
+    async function syncStudentToCloud() {
+      if (!userClass || !userStudentNo) return;
+      studentData.updatedAt = Date.now();
+      
+      // Local fallback
+      try {
+        const studentDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'yuanlongping_records', docId);
+        await setDoc(studentDocRef, studentData, { merge: true });
+      } catch (err) {
+        console.warn("Firestore save error:", err);
+      }
+      updateGlobalUI();
+    }
+
+    /* =========================================================================
+       5. UI RENDERERS & EVENT HANDLERS
+       ========================================================================= */
+    
+    // Calculate total correct questions count (including re-attempts)
+    function getFinalCorrectCount() {
+      let count = 0;
+      QUESTIONS.forEach(q => {
+        const rec = studentData.answers[q.id];
+        if (rec && rec.isCurrentCorrect) {
+          count++;
+        }
+      });
+      return count;
+    }
+
+    // Calculate initial attempt correct count (First-Attempt Lock)
+    function getFirstAttemptCorrectCount(answers = studentData.answers) {
+      let count = 0;
+      QUESTIONS.forEach(q => {
+        const rec = answers[q.id];
+        if (rec && rec.isFirstCorrect) {
+          count++;
+        }
+      });
+      return count;
+    }
+
+    function updateGlobalUI() {
+      const finalCorrect = getFinalCorrectCount();
+      document.getElementById('display-user-id').textContent = `${studentData.userClass}-${studentData.userStudentNo}`;
+      document.getElementById('display-wins').textContent = studentData.winsCount;
+      document.getElementById('display-quiz-score').textContent = finalCorrect;
+      document.getElementById('current-round-num').textContent = studentData.currentRound;
+      document.getElementById('garage-correct-count').textContent = finalCorrect;
+      document.getElementById('quiz-tab-badge').textContent = `${finalCorrect}/12`;
+
+      // Selected Beyblade quick info
+      const currBlade = BEYBLADES.find(b => b.id === studentData.selectedBeybladeId) || BEYBLADES[0];
+      document.getElementById('player-beyblade-name').textContent = currBlade.name;
+      document.getElementById('quick-beyblade-title').textContent = currBlade.name;
+      document.getElementById('quick-beyblade-preview').textContent = currBlade.icon;
+      document.getElementById('quick-beyblade-speed').textContent = 
+        currBlade.speedType === 'slow' ? '慢速' : currBlade.speedType === 'fast' ? '快速' : '超級快速';
+      document.getElementById('quick-stat-atk').textContent = currBlade.attack;
+      document.getElementById('quick-stat-def').textContent = currBlade.defense;
+      document.getElementById('quick-stat-wt').textContent = currBlade.weight;
+
+      // Computer Beyblade scaling
+      const aiBlade = getAIBeyblade();
+      document.getElementById('ai-beyblade-name').textContent = aiBlade.name;
+
+      renderGarage();
+      renderQuiz();
+    }
+
+    function getAIBeyblade() {
+      // Scales AI strength according to match round
+      if (studentData.currentRound <= 2) {
+        return { name: '黑煞暴龍', icon: '🦖', speedMultiplier: 1.1, color: '#991b1b' };
+      } else if (studentData.currentRound <= 4) {
+        return { name: '深海狂鯊', icon: '🦈', speedMultiplier: 2.2, color: '#1e3a8a' };
+      } else {
+        return { name: '帝王天馬', icon: '🦄', speedMultiplier: 3.6, color: '#581c87' };
+      }
+    }
+
+    /* Render Beyblade Garage UI */
+    function renderGarage() {
+      const container = document.getElementById('beyblades-grid');
+      const finalCorrect = getFinalCorrectCount();
+      
+      container.innerHTML = BEYBLADES.map(b => {
+        const isUnlocked = finalCorrect >= b.reqCorrect;
+        const isSelected = studentData.selectedBeybladeId === b.id;
+
+        return `
+          <div class="bg-gray-950 border ${isSelected ? 'border-amber-400 ring-2 ring-amber-400/30' : isUnlocked ? 'border-gray-800' : 'border-gray-800/50 opacity-60'} rounded-2xl p-5 flex flex-col justify-between gap-4 relative overflow-hidden transition hover:border-gray-700">
+            ${!isUnlocked ? `
+              <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center text-center p-4">
+                <i class="fa-solid fa-lock text-3xl text-amber-400 mb-2"></i>
+                <div class="text-xs font-bold text-gray-200">未解鎖</div>
+                <div class="text-[11px] text-amber-300 mt-1">需答對 ${b.reqCorrect} 題故事問題</div>
+              </div>
+            ` : ''}
+
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gray-900 border border-gray-700 flex items-center justify-center text-2xl shadow-inner">
+                  ${b.icon}
+                </div>
                 <div>
-                    <h3 class="text-xl font-black text-amber-400 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-column"></i> 全班閱讀表現數據分析與迷思診斷
-                    </h3>
-                    <p class="text-xs text-slate-400">首答鎖定機制 (First-Attempt Lock) 數據彙整</p>
+                  <h4 class="font-bold text-white text-sm">${b.name}</h4>
+                  <span class="px-2 py-0.5 text-[10px] ${b.speedType === 'slow' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : b.speedType === 'fast' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/30'} border rounded">
+                    ${b.speedType === 'slow' ? '慢速' : b.speedType === 'fast' ? '快速' : '超級快速 + 火花'}
+                  </span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="exportToExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-file-excel"></i> 匯出 Excel .xlsx 報告
-                    </button>
-                    <button onclick="closeTeacherDashboard()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
+              </div>
             </div>
 
-            <!-- Analytics Content Scroll Area -->
-            <div class="flex-1 overflow-y-auto space-y-6 pr-2">
+            <p class="text-xs text-gray-400 leading-relaxed">${b.description}</p>
+
+            <!-- Stats Bar -->
+            <div class="space-y-1.5 text-[11px] bg-gray-900/60 p-2.5 rounded-xl border border-gray-800">
+              <div class="flex items-center justify-between text-gray-400">
+                <span>攻擊 (Attack)</span>
+                <span class="font-mono text-amber-400 font-bold">${b.attack}</span>
+              </div>
+              <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-amber-400 h-full" style="width: ${b.attack}%"></div>
+              </div>
+
+              <div class="flex items-center justify-between text-gray-400 mt-1">
+                <span>防守 (Defense)</span>
+                <span class="font-mono text-blue-400 font-bold">${b.defense}</span>
+              </div>
+              <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-blue-400 h-full" style="width: ${b.defense}%"></div>
+              </div>
+            </div>
+
+            <button 
+              onclick="selectBeyblade('${b.id}')"
+              ${!isUnlocked || isSelected ? 'disabled' : ''}
+              class="w-full py-2.5 rounded-xl font-bold text-xs transition ${isSelected ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 cursor-default' : isUnlocked ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg' : 'bg-gray-800 text-gray-500 border border-gray-800'}">
+              ${isSelected ? '已出戰中' : isUnlocked ? '選擇此陀螺出戰' : '鎖定中'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.selectBeyblade = function(id) {
+      studentData.selectedBeybladeId = id;
+      syncStudentToCloud();
+      playSoundEffect('correct');
+    };
+
+    /* Render Quiz Section UI */
+    function renderQuiz() {
+      const container = document.getElementById('questions-container');
+      
+      container.innerHTML = QUESTIONS.map(q => {
+        const rec = studentData.answers[q.id];
+        const isAnswered = !!rec;
+        const isCurrentCorrect = rec ? rec.isCurrentCorrect : false;
+        const isFirstCorrect = rec ? rec.isFirstCorrect : false;
+
+        return `
+          <div class="bg-gray-950 border ${isCurrentCorrect ? 'border-emerald-500/40 bg-emerald-950/10' : isAnswered ? 'border-rose-500/40 bg-rose-950/10' : 'border-gray-800'} rounded-2xl p-5 transition">
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <h3 class="font-bold text-white text-sm md:text-base leading-snug">${q.question}</h3>
+              <div class="flex items-center gap-2 shrink-0">
+                ${isAnswered ? `
+                  <span class="px-2.5 py-1 text-xs font-mono font-bold rounded-lg border ${isCurrentCorrect ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border-rose-500/40'}">
+                    ${isCurrentCorrect ? '✓ 已答對' : '✕ 待補答'}
+                  </span>
+                ` : `
+                  <span class="px-2.5 py-1 text-xs font-mono text-gray-500 bg-gray-900 rounded-lg border border-gray-800">未作答</span>
+                `}
+              </div>
+            </div>
+
+            <!-- Options Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 my-3">
+              ${q.options.map((opt, idx) => {
+                let btnClass = "bg-gray-900 border-gray-800 text-gray-300 hover:bg-gray-800 hover:border-gray-700";
                 
-                <!-- Overview Stats Grid -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center">
-                        <div class="text-xs text-slate-400">總測試學生</div>
-                        <div id="statTotalStudents" class="text-2xl font-black text-cyan-400 font-tech">1</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center">
-                        <div class="text-xs text-slate-400">首答平均正確率</div>
-                        <div id="statAvgFirstAcc" class="text-2xl font-black text-green-400 font-tech">0%</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center">
-                        <div class="text-xs text-slate-400">補答後完成率</div>
-                        <div id="statFinalCompletion" class="text-2xl font-black text-amber-400 font-tech">0%</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center">
-                        <div class="text-xs text-slate-400">主要薄弱知識層面</div>
-                        <div id="statWeakness" class="text-xs font-black text-red-400 mt-1">堅毅精神應用</div>
-                    </div>
-                </div>
-
-                <!-- Complete 12 Questions Breakdown Table -->
-                <div class="bg-slate-900/80 rounded-xl border border-slate-800 overflow-hidden">
-                    <div class="p-3.5 bg-slate-800/50 font-bold text-sm text-slate-200 border-b border-slate-800 flex justify-between items-center">
-                        <span>全 12 條題目表現及答錯原因解析</span>
-                        <span class="text-xs text-slate-400 font-normal">即時同步數據</span>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs text-slate-300">
-                            <thead class="bg-slate-950 text-slate-400 uppercase font-bold text-[10px]">
-                                <tr>
-                                    <th class="p-3">題號</th>
-                                    <th class="p-3">完整題目</th>
-                                    <th class="p-3">知識層面</th>
-                                    <th class="p-3">正確答案</th>
-                                    <th class="p-3">學生首答</th>
-                                    <th class="p-3">首答結果</th>
-                                    <th class="p-3">答錯原因與迷思分析</th>
-                                </tr>
-                            </thead>
-                            <tbody id="teacherTableBody" class="divide-y divide-slate-800">
-                                <!-- Dynamic rows via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="bg-slate-950 border-t border-slate-900 py-3 text-center text-xs text-slate-500">
-        爆旋陀螺 語文閱讀大對決 &copy; 2026 · 設計用於 GitHub Pages 發佈與 Google Sheets 數據同步
-    </footer>
-
-    <script>
-        /* ==========================================================================
-           1. QUESTION BANK & KNOWLEDGE DIMENSIONS (Doc Source)
-           ========================================================================== */
-        const QUESTION_BANK = [
-            {
-                id: 1,
-                question: "1. 袁隆平被稱為什麼？",
-                options: ["A. 雜交水稻之父", "B. 太空科學家", "C. 數學家", "D. 畫家"],
-                answer: 0,
-                dimension: "事實檢索",
-                hint: "提示：題目標題與影片重點提到他與「水稻」相關的重大成就喔！",
-                errorAnalysis: "若選非A：未能掌握文章核心主題人物的標誌性稱號。"
-            },
-            {
-                id: 2,
-                question: "2. 袁隆平小時候為什麼立志學農？",
-                options: ["A. 因為家人要求他學農", "B. 因為一年級參觀郊區植物園，被美麗的花草樹木和農作物吸引", "C. 因為他不喜歡讀書", "D. 因為老師強迫他選擇"],
-                answer: 1,
-                dimension: "事實檢索",
-                hint: "提示：想想他一年級參觀郊區植物園時看到的美麗景致與農作物。",
-                errorAnalysis: "若選非B：對袁隆平童年志向萌芽的原因理解有偏差。"
-            },
-            {
-                id: 3,
-                question: "3. 袁隆平大學畢業後被分配到哪裡工作？",
-                options: ["A. 北京的研究機構", "B. 湖南安江農業學校當老師和做研究", "C. 上海的工廠", "D. 外國的大學"],
-                answer: 1,
-                dimension: "事實檢索",
-                hint: "提示：他去了一所地方農業學校一邊教學一邊開展研究。",
-                errorAnalysis: "若選非B：混淆了袁隆平職業生涯起步的地理位置與機構名稱。"
-            },
-            {
-                id: 4,
-                question: "4. 什麼事情讓袁隆平決心研究高產水稻？",
-                options: ["A. 他想出名", "B. 他想賺很多錢", "C. 老師吩咐他做研究", "D. 他目睹飢荒，看到人們因缺糧受苦"],
-                answer: 3,
-                dimension: "因果理解",
-                hint: "提示：看到人們面臨缺糧與飢餓的痛苦，激發了他的使命感與決心。",
-                errorAnalysis: "若選非D：未能體會科學家以救濟蒼生為己任的高尚動機。"
-            },
-            {
-                id: 5,
-                question: "5. 袁隆平在田裡發現一株特別的水稻時，那株水稻有什麼特點？",
-                options: ["A. 葉子特別綠", "B. 穗大粒多，有二百多粒穀粒", "C. 長得特別矮", "D. 沒有結出穀粒"],
-                answer: 1,
-                dimension: "細節理解",
-                hint: "提示：這株天然特別水稻結出的穀粒數量非常多，超過二百粒！",
-                errorAnalysis: "若選非B：忽視了天然優質水稻最關鍵的「穗大粒多」形態特徵。"
-            },
-            {
-                id: 6,
-                question: "6. 袁隆平的研究團隊在哪裡找到重要的野生雄性不育水稻「野敗」？",
-                options: ["A. 北京", "B. 湖南安江", "C. 海南島", "D. 上海"],
-                answer: 2,
-                dimension: "事實檢索",
-                hint: "提示：地點在一個氣候溫暖、適合熱帶植物生長的島嶼上。",
-                errorAnalysis: "若選非C：未能記住關鍵突破性野生稻種「野敗」的發現地點。"
-            },
-            {
-                id: 7,
-                question: "7. 為了找到雄性不育水稻，袁隆平做了什麼？",
-                options: ["A. 只在實驗室裡看顯微鏡", "B. 每天在烈日下用放大鏡一株一株檢查稻穗", "C. 請很多人幫忙，自己不勞動", "D. 只看外國書本就成功"],
-                answer: 1,
-                dimension: "行為推論",
-                hint: "提示：袁隆平不怕曬太陽，親自頂著烈日到稻田裡耐心地逐一檢查。",
-                errorAnalysis: "若選非B：未能理解科學實驗需要親身實踐、不畏艱辛的科研態度。"
-            },
-            {
-                id: 8,
-                question: "8. 袁隆平成功研發出雜交水稻後，對中國有什麼重要影響？",
-                options: ["A. 讓水稻產量大幅提高，幫助解決糧食問題", "B. 讓所有人都不需要種田", "C. 讓水稻變得不能食用", "D. 讓農民都不想再工作"],
-                answer: 0,
-                dimension: "影響與貢獻",
-                hint: "提示：這項重大成果大幅提升了稻米產量，解決了無數人的溫飽問題。",
-                errorAnalysis: "若選非A：未能正確認知雜交水稻對國家糧食安全的深遠貢獻。"
-            },
-            {
-                id: 9,
-                question: "9. 袁隆平研發雜交水稻成功後，對世界有什麼重要貢獻？",
-                options: ["A. 讓雜交水稻技術只留在中國，不給其他國家", "B. 幫助亞洲、非洲等地解決飢餓問題，並分享種植技術", "C. 讓所有人都不需要再種水稻", "D. 把技術賣給外國賺很多錢後就停止研究"],
-                answer: 1,
-                dimension: "影響與貢獻",
-                hint: "提示：他毫無保留地將技術推廣至亞非等地區，無私分享技術。",
-                errorAnalysis: "若選非B：未能體會大愛無疆、造福全人類的大國科學家胸懷。"
-            },
-            {
-                id: 10,
-                question: "10. 袁隆平為了找到有用的水稻植株，最能顯示他堅毅精神的做法是什麼？",
-                options: ["A. 只在家裡看書，等結果自動出現", "B. 請別人代勞，自己休息", "C. 每天頂著烈日走進稻田，一株一株仔細檢查", "D. 發現一次失敗就馬上停止研究"],
-                answer: 2,
-                dimension: "品德價值內化",
-                hint: "提示：堅毅代表不畏艱難酷熱、持之以恆地親身付出行動。",
-                errorAnalysis: "若選非C：對「堅毅」精神的具體實踐行為缺乏正確認知。"
-            },
-            {
-                id: 11,
-                question: "11. 如果你在學習新技能（例如學騎單車、學樂器）時，一次又一次失敗，你應該怎麼做才最像袁隆平的堅毅精神？",
-                options: ["A. 立刻放棄，說「我做不到」", "B. 只怪別人沒有幫你", "C. 繼續練習，每次失敗後找出問題再試一次", "D. 躲起來不練習，等別人替你完成"],
-                answer: 2,
-                dimension: "情境生活應用",
-                hint: "提示：面對失敗不氣餒，認真尋找原因並堅持不懈再試一次。",
-                errorAnalysis: "若選非C：在遭遇挫折時缺乏自我修正與堅持不懈的移情應用能力。"
-            },
-            {
-                id: 12,
-                question: "12. 當你在完成功課或參加比賽時遇到困難，覺得很想放棄，以下哪個做法最能實踐堅毅精神？",
-                options: ["A. 把困難丟給同學或父母處理", "B. 抱怨「為什麼這麼難」，然後生氣不做", "C. 馬上停止，改做其他容易的事", "D. 告訴自己「再努力一下」，一步一步克服問題"],
-                answer: 3,
-                dimension: "情境生活應用",
-                hint: "提示：自我鼓勵「再努力一下」，按部就班勇敢克服難關。",
-                errorAnalysis: "若選非D：面對現實困難時傾向於逃避，未能貫徹堅毅品質。"
-            }
-        ];
-
-        /* ==========================================================================
-           2. BEYBLADE DECK DEFINITIONS (Matching User Image Palette & Requirements)
-           ========================================================================== */
-        const BEYBLADE_DATA = [
-            {
-                id: 'chip_dragon',
-                name: '薯片龍',
-                unlockReq: 0,
-                speedType: 'slow', // 慢速
-                speedVal: 3.5,
-                sparkEffect: false,
-                icon: '🐲',
-                color: '#f59e0b',
-                ringColor: '#d97706',
-                stats: { attack: 60, defense: 75, weight: 65 },
-                desc: '入門防禦型陀螺，穩健旋轉。'
-            },
-            {
-                id: 'tyranno',
-                name: '暴龍',
-                unlockReq: 0,
-                speedType: 'slow', // 慢速
-                speedVal: 3.8,
-                sparkEffect: false,
-                icon: '🦖',
-                color: '#ef4444',
-                ringColor: '#b91c1c',
-                stats: { attack: 80, defense: 50, weight: 70 },
-                desc: '強攻型恐龍陀螺，具撞擊力。'
-            },
-            {
-                id: 'shark',
-                name: '鯊魚',
-                unlockReq: 4,
-                speedType: 'fast', // 快速
-                speedVal: 6.5,
-                sparkEffect: false,
-                icon: '🦈',
-                color: '#06b6d4',
-                ringColor: '#0284c7',
-                stats: { attack: 90, defense: 55, weight: 75 },
-                desc: '疾風衝刺，撕裂敵方防線！'
-            },
-            {
-                id: 'phoenix',
-                name: '鳳凰',
-                unlockReq: 4,
-                speedType: 'fast', // 快速
-                speedVal: 6.2,
-                sparkEffect: false,
-                icon: '🦅',
-                color: '#ec4899',
-                ringColor: '#be185d',
-                stats: { attack: 70, defense: 85, weight: 80 },
-                desc: '浴火不屈，持久迴旋表現出色。'
-            },
-            {
-                id: 'scepter',
-                name: '神杖',
-                unlockReq: 8,
-                speedType: 'super', // 超級快速 + 火花
-                speedVal: 9.5,
-                sparkEffect: true,
-                icon: '🔱',
-                color: '#eab308',
-                ringColor: '#ca8a04',
-                stats: { attack: 85, defense: 90, weight: 88 },
-                desc: '王者神權，撞擊時迸發神聖火花！'
-            },
-            {
-                id: 'pegasus',
-                name: '天馬',
-                unlockReq: 8,
-                speedType: 'super', // 超級快速 + 火花
-                speedVal: 10.0,
-                sparkEffect: true,
-                icon: '🦄',
-                color: '#3b82f6',
-                ringColor: '#1d4ed8',
-                stats: { attack: 95, defense: 70, weight: 85 },
-                desc: '天馬行空極速碰撞，強光火花閃耀！'
-            },
-            {
-                id: 'cobalt_drake',
-                name: '鈷藍龍',
-                unlockReq: 8,
-                speedType: 'super', // 超級快速 + 火花
-                speedVal: 10.5,
-                sparkEffect: true,
-                icon: '🐉',
-                color: '#6366f1',
-                ringColor: '#4338ca',
-                stats: { attack: 98, defense: 88, weight: 95 },
-                desc: '傳說級終極藍龍，超高速碰撞激起烈焰火花！'
-            }
-        ];
-
-        // Opponent Beyblade Pool
-        const OPPONENT_BEYS = [
-            { name: '黑暗魔龍', icon: '👹', color: '#7c3aed', ringColor: '#4c1d95', speedVal: 5.5, stats: { attack: 85, defense: 70 } },
-            { name: '烈焰獅王', icon: '🦁', color: '#ea580c', ringColor: '#9a3412', speedVal: 7.0, stats: { attack: 88, defense: 65 } },
-            { name: '帝王巨神', icon: '👑', color: '#10b981', ringColor: '#047857', speedVal: 8.5, stats: { attack: 92, defense: 85 } }
-        ];
-
-        /* ==========================================================================
-           3. APP STATE STORE
-           ========================================================================== */
-        let studentProfile = {
-            className: '',
-            studentNum: '',
-            loginTime: null
-        };
-
-        // Quiz State & First-Attempt Lock Tracking
-        let quizState = {
-            // Stores answer records for all 12 Qs:
-            // { selectedOption: Number, isCorrect: Boolean, lockedFirstAttempt: Boolean, retrySuccess: Boolean }
-            records: {},
-            correctCount: 0,
-            currentQIdx: 0
-        };
-
-        // Game Match State
-        let gameState = {
-            roundWins: 0, // Need 5 to clear game
-            playerMatchPoints: 0,
-            cpuMatchPoints: 0,
-            selectedPlayerBey: BEYBLADE_DATA[0],
-            currentCpuBey: OPPONENT_BEYS[0],
-            isBattling: false
-        };
-
-        /* ==========================================================================
-           4. AUDIO SYNTHESIZER (Web Audio API - Exciting BGM & Clash SFX)
-           ========================================================================== */
-        let audioCtx = null;
-        let isAudioMuted = true;
-        let bgmInterval = null;
-
-        function initAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-
-        function toggleAudio() {
-            initAudioContext();
-            isAudioMuted = !isAudioMuted;
-            const btn = document.getElementById('bgmIcon');
-            if (isAudioMuted) {
-                btn.className = "fa-solid fa-volume-xmark text-red-400";
-                if (bgmInterval) clearInterval(bgmInterval);
-            } else {
-                btn.className = "fa-solid fa-volume-high text-green-400";
-                playBgmLoop();
-            }
-        }
-
-        function playClashSound(isSparking = false) {
-            if (isAudioMuted || !audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = isSparking ? 'sawtooth' : 'triangle';
-                osc.frequency.setValueAtTime(isSparking ? 800 : 400, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.15);
-            } catch (e) {}
-        }
-
-        function playBgmLoop() {
-            if (bgmInterval) clearInterval(bgmInterval);
-            let noteIdx = 0;
-            const notes = [220, 261, 293, 329, 392, 329, 293, 261];
-            bgmInterval = setInterval(() => {
-                if (isAudioMuted || !audioCtx) return;
-                try {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(notes[noteIdx % notes.length], audioCtx.currentTime);
-                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.2);
-                    noteIdx++;
-                } catch(e) {}
-            }, 250);
-        }
-
-        /* ==========================================================================
-           5. LOGIN & STORY INSTRUCTIONS LOGIC
-           ========================================================================== */
-        function handleLoginSubmit(e) {
-            e.preventDefault();
-            const cls = document.getElementById('inputClass').value.trim();
-            const num = document.getElementById('inputNum').value.trim();
-
-            if (!cls || !num) return;
-
-            studentProfile.className = cls;
-            studentProfile.studentNum = num;
-            studentProfile.loginTime = new Date().toLocaleString();
-
-            document.getElementById('displayClass').innerText = cls;
-            document.getElementById('displayNum').innerText = num;
-            document.getElementById('studentBadge').classList.remove('hidden');
-
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('introModal').classList.remove('hidden');
-
-            renderBeyDeck();
-            initStadiumCanvas();
-        }
-
-        function skipIntro() {
-            document.getElementById('introModal').classList.add('hidden');
-        }
-
-        /* ==========================================================================
-           6. BEYBLADE DECK & UNLOCK SYSTEM
-           ========================================================================== */
-        function renderBeyDeck() {
-            const container = document.getElementById('beyDeckContainer');
-            container.innerHTML = '';
-
-            BEYBLADE_DATA.forEach(bey => {
-                const isUnlocked = quizState.correctCount >= bey.unlockReq;
-                const isSelected = gameState.selectedPlayerBey.id === bey.id;
-
-                const card = document.createElement('div');
-                card.className = `p-3 rounded-xl border transition cursor-pointer flex items-center justify-between ${
-                    isSelected ? 'bg-amber-500/10 border-amber-500 shadow-md' : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-                } ${!isUnlocked ? 'opacity-60 grayscale cursor-not-allowed' : ''}`;
-
-                card.onclick = () => {
-                    if (!isUnlocked) {
-                        alert(`解鎖提示：需要答對至少 ${bey.unlockReq} 條問題才能使用【${bey.name}】！`);
-                        return;
-                    }
-                    gameState.selectedPlayerBey = bey;
-                    document.getElementById('playerDeckName').innerText = bey.name;
-                    document.getElementById('playerDeckIcon').innerText = bey.icon;
-                    renderBeyDeck();
-                };
-
-                // Badge speed style
-                let speedBadge = '<span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">慢速</span>';
-                if (bey.speedType === 'fast') speedBadge = '<span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">快速</span>';
-                if (bey.speedType === 'super') speedBadge = '<span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700 font-bold">極速+火花✨</span>';
-
-                card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:${bey.color}20; border:1px solid ${bey.color}">
-                            ${bey.icon}
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-extrabold text-sm text-white">${bey.name}</span>
-                                ${speedBadge}
-                            </div>
-                            <div class="text-[11px] text-slate-400 mt-0.5">
-                                攻:${bey.stats.attack} | 防:${bey.stats.defense} | 重:${bey.stats.weight}
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        ${!isUnlocked 
-                            ? `<span class="text-xs text-amber-400 font-bold"><i class="fa-solid fa-lock mr-1"></i>需答對${bey.unlockReq}題</span>` 
-                            : (isSelected ? `<span class="text-xs text-amber-400 font-black"><i class="fa-solid fa-circle-check mr-1"></i>已裝備</span>` : `<span class="text-xs text-slate-500">選擇</span>`)
-                        }
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        /* ==========================================================================
-           7. READING QUIZ STATION & FIRST-ATTEMPT LOCKING MECHANISM
-           ========================================================================== */
-        function openQuizModal() {
-            document.getElementById('quizModal').classList.remove('hidden');
-            renderQuestionCard();
-        }
-
-        function closeQuizModal() {
-            document.getElementById('quizModal').classList.add('hidden');
-        }
-
-        function navigateQuiz(dir) {
-            const nextIdx = quizState.currentQIdx + dir;
-            if (nextIdx >= 0 && nextIdx < QUESTION_BANK.length) {
-                quizState.currentQIdx = nextIdx;
-                renderQuestionCard();
-            }
-        }
-
-        function renderQuestionCard() {
-            const q = QUESTION_BANK[quizState.currentQIdx];
-            document.getElementById('currentQNum').innerText = q.id;
-            document.getElementById('quizQuestionText').innerText = q.question;
-
-            const rec = quizState.records[q.id];
-            const feedbackBox = document.getElementById('quizFeedbackBox');
-            feedbackBox.className = "hidden p-3.5 rounded-xl text-xs sm:text-sm font-semibold transition";
-
-            const optionsGrid = document.getElementById('quizOptionsGrid');
-            optionsGrid.innerHTML = '';
-
-            q.options.forEach((optText, optIdx) => {
-                const optBtn = document.createElement('button');
-                optBtn.className = "w-full p-3.5 text-left rounded-xl border text-xs sm:text-sm font-bold transition flex items-center justify-between ";
-
-                let isSelectedOption = rec && rec.selectedOption === optIdx;
-                let isCorrectOption = q.answer === optIdx;
-
-                if (rec && rec.isCorrect) {
-                    if (isCorrectOption) {
-                        optBtn.className += "bg-green-500/20 border-green-500 text-green-300";
-                    } else {
-                        optBtn.className += "bg-slate-900 border-slate-800 text-slate-500 opacity-50";
-                    }
-                } else if (rec && !rec.isCorrect) {
-                    if (isSelectedOption) {
-                        optBtn.className += "bg-red-500/20 border-red-500 text-red-300";
-                    } else {
-                        optBtn.className += "bg-slate-900 border-slate-700 text-slate-200 hover:border-indigo-500";
-                    }
-                } else {
-                    optBtn.className += "bg-slate-900 border-slate-700 text-slate-200 hover:border-indigo-500 hover:bg-slate-800";
-                }
-
-                optBtn.innerText = optText;
-                optBtn.onclick = () => submitAnswer(q, optIdx);
-
-                optionsGrid.appendChild(optBtn);
-            });
-
-            // Display Hint if user answered wrong previously
-            if (rec) {
-                feedbackBox.classList.remove('hidden');
-                if (rec.isCorrect) {
-                    feedbackBox.className = "p-3.5 rounded-xl text-xs sm:text-sm font-semibold bg-green-950/60 border border-green-800 text-green-300";
-                    feedbackBox.innerHTML = `<i class="fa-solid fa-circle-check text-base mr-1.5"></i> 正確答案！此題已通過認證。`;
-                } else {
-                    feedbackBox.className = "p-3.5 rounded-xl text-xs sm:text-sm font-semibold bg-amber-950/60 border border-amber-800 text-amber-300";
-                    feedbackBox.innerHTML = `<i class="fa-solid fa-lightbulb text-base mr-1.5 text-amber-400"></i> <strong>作答提示：</strong> ${q.hint}`;
-                }
-            }
-
-            // Update Header Stats & Progress
-            recalculateQuizStats();
-        }
-
-        function submitAnswer(q, optIdx) {
-            const isCorrect = (optIdx === q.answer);
-            let rec = quizState.records[q.id];
-
-            if (!rec) {
-                // First-Attempt Lock Requirement!
-                quizState.records[q.id] = {
-                    selectedOption: optIdx, // First attempt choice locked
-                    isCorrect: isCorrect,   // First attempt status locked
-                    firstAttemptOption: optIdx,
-                    firstAttemptCorrect: isCorrect,
-                    retrySuccess: isCorrect,
-                    timestamp: new Date().toLocaleTimeString()
-                };
-            } else {
-                // Retry attempt
-                rec.retrySuccess = isCorrect || rec.retrySuccess;
-            }
-
-            if (!isCorrect && (!rec || !rec.isCorrect)) {
-                playClashSound(false);
-            }
-
-            renderQuestionCard();
-            renderBeyDeck();
-        }
-
-        function recalculateQuizStats() {
-            let correctCount = 0;
-            Object.values(quizState.records).forEach(r => {
-                if (r.retrySuccess || r.isCorrect) correctCount++;
-            });
-            quizState.correctCount = correctCount;
-
-            document.getElementById('quizProgressBadge').innerText = `${correctCount} / 12 正確`;
-            const pct = Math.round((correctCount / 12) * 100);
-            document.getElementById('quizProgressBar').style.width = `${pct}%`;
-        }
-
-        /* ==========================================================================
-           8. CANVAS STADIUM PHYSICS & COLLISION BATTLE ENGINE
-           ========================================================================== */
-        let canvas, ctx;
-        let pTop = { x: 140, y: 200, vx: 0, vy: 0, angle: 0, speed: 0 };
-        let cTop = { x: 260, y: 200, vx: 0, vy: 0, angle: 0, speed: 0 };
-        let sparkParticles = [];
-        let battleAnimId = null;
-
-        function initStadiumCanvas() {
-            canvas = document.getElementById('stadiumCanvas');
-            ctx = canvas.getContext('2d');
-            drawStadium();
-        }
-
-        function drawStadium() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Outer Ridge Rim
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(200, 200, 190, 0, Math.PI * 2);
-            ctx.fillStyle = '#0f172a';
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#000';
-            ctx.fill();
-            ctx.lineWidth = 8;
-            ctx.strokeStyle = '#334155';
-            ctx.stroke();
-
-            // Extreme Finish Red Line Pocket
-            ctx.beginPath();
-            ctx.arc(200, 200, 160, 0, Math.PI * 2);
-            ctx.strokeStyle = '#dc2626';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            // Dish Lines
-            ctx.beginPath();
-            ctx.arc(200, 200, 100, 0, Math.PI * 2);
-            ctx.strokeStyle = '#1e293b';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Render Tops
-            drawBeybladeTop(pTop.x, pTop.y, pTop.angle, gameState.selectedPlayerBey.color, gameState.selectedPlayerBey.ringColor, gameState.selectedPlayerBey.icon);
-            drawBeybladeTop(cTop.x, cTop.y, cTop.angle, gameState.currentCpuBey.color, gameState.currentCpuBey.ringColor, gameState.currentCpuBey.icon);
-
-            // Render Spark Particles
-            sparkParticles.forEach((sp, idx) => {
-                ctx.beginPath();
-                ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
-                ctx.fillStyle = sp.color;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#f59e0b';
-                ctx.fill();
-                sp.x += sp.vx;
-                sp.y += sp.vy;
-                sp.alpha -= 0.05;
-                if (sp.alpha <= 0) sparkParticles.splice(idx, 1);
-            });
-
-            ctx.restore();
-        }
-
-        function drawBeybladeTop(x, y, angle, coreColor, ringColor, icon) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(angle);
-
-            // Outer Blades
-            ctx.beginPath();
-            for (let i = 0; i < 4; i++) {
-                ctx.rotate(Math.PI / 2);
-                ctx.rect(15, -8, 12, 16);
-            }
-            ctx.fillStyle = ringColor;
-            ctx.fill();
-
-            // Energy Ring Layer
-            ctx.beginPath();
-            ctx.arc(0, 0, 22, 0, Math.PI * 2);
-            ctx.fillStyle = coreColor;
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = coreColor;
-            ctx.fill();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
-
-            // Center Chip Icon
-            ctx.rotate(-angle); // Keep icon upright
-            ctx.font = '16px serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(icon, 0, 0);
-
-            ctx.restore();
-        }
-
-        function emitSparks(x, y, count = 12) {
-            for (let i = 0; i < count; i++) {
-                const ang = Math.random() * Math.PI * 2;
-                const spd = Math.random() * 4 + 2;
-                sparkParticles.push({
-                    x: x,
-                    y: y,
-                    vx: Math.cos(ang) * spd,
-                    vy: Math.sin(ang) * spd,
-                    size: Math.random() * 3 + 1,
-                    alpha: 1.0,
-                    color: Math.random() > 0.5 ? '#fef08a' : '#f97316'
-                });
-            }
-        }
-
-        /* ==========================================================================
-           9. MATCH LAUNCH & BATTLE EXECUTION
-           ========================================================================== */
-        function startBeybladeMatch() {
-            if (gameState.isBattling) return;
-
-            // Check final match winning condition requirement
-            if (gameState.roundWins >= 4 && quizState.correctCount < 12) {
-                alert("⚠️ 進入第 5 局總決賽前，你必須在「答題館」完成並答對全數 12 條閱讀理解題目！");
-                openQuizModal();
-                return;
-            }
-
-            gameState.isBattling = true;
-            document.getElementById('launchBattleBtn').disabled = true;
-
-            // Select Opponent
-            gameState.currentCpuBey = OPPONENT_BEYS[Math.floor(Math.random() * OPPONENT_BEYS.length)];
-            document.getElementById('cpuDeckName').innerText = gameState.currentCpuBey.name;
-            document.getElementById('cpuDeckIcon').innerText = gameState.currentCpuBey.icon;
-
-            // Display Announcer Countdown
-            const announcer = document.getElementById('battleAnnouncer');
-            const txt = document.getElementById('announcerText');
-            announcer.style.opacity = '1';
-            txt.innerText = "3, 2, 1 🚀 發射！";
-
-            setTimeout(() => {
-                announcer.style.opacity = '0';
-                runBattleSimulation();
-            }, 1000);
-        }
-
-        function runBattleSimulation() {
-            const pSpeed = gameState.selectedPlayerBey.speedVal;
-            const cSpeed = gameState.currentCpuBey.speedVal;
-
-            pTop = { x: 120, y: 200, vx: pSpeed * 0.8, vy: (Math.random() - 0.5) * 4, angle: 0 };
-            cTop = { x: 280, y: 200, vx: -cSpeed * 0.8, vy: (Math.random() - 0.5) * 4, angle: 0 };
-
-            // Battle Duration: 2.0s to 4.0s
-            const durationMs = Math.floor(Math.random() * 2000) + 2000;
-            const startTime = Date.now();
-
-            function animLoop() {
-                const elapsed = Date.now() - startTime;
-
-                // Move tops towards center stadium gravity
-                pTop.vx += (200 - pTop.x) * 0.01;
-                pTop.vy += (200 - pTop.y) * 0.01;
-                cTop.vx += (200 - cTop.x) * 0.01;
-                cTop.vy += (200 - cTop.y) * 0.01;
-
-                pTop.x += pTop.vx;
-                pTop.y += pTop.vy;
-                cTop.x += cTop.vx;
-                cTop.y += cTop.vy;
-
-                pTop.angle += pSpeed * 0.1;
-                cTop.angle += cSpeed * 0.1;
-
-                // Collision Detection between tops
-                const dist = Math.hypot(pTop.x - cTop.x, pTop.y - cTop.y);
-                if (dist < 44) {
-                    // Collision Bounce
-                    pTop.vx = -pTop.vx * 1.2;
-                    pTop.vy = -pTop.vy * 1.2;
-                    cTop.vx = -cTop.vx * 1.2;
-                    cTop.vy = -cTop.vy * 1.2;
-
-                    const clashX = (pTop.x + cTop.x) / 2;
-                    const clashY = (pTop.y + cTop.y) / 2;
-
-                    // Spark Effect Check (Super fast Beyblades produce sparks)
-                    const isSpark = gameState.selectedPlayerBey.sparkEffect;
-                    emitSparks(clashX, clashY, isSpark ? 20 : 6);
-                    playClashSound(isSpark);
-                }
-
-                drawStadium();
-
-                if (elapsed < durationMs) {
-                    battleAnimId = requestAnimationFrame(animLoop);
-                } else {
-                    finishBattleRound();
-                }
-            }
-
-            animLoop();
-        }
-
-        function finishBattleRound() {
-            cancelAnimationFrame(battleAnimId);
-            gameState.isBattling = false;
-            document.getElementById('launchBattleBtn').disabled = false;
-
-            // Outcome Types & Scoring
-            const randOutcome = Math.random();
-            let pts = 1;
-            let outcomeTitle = "迴旋勝利！(+1分)";
-
-            if (randOutcome > 0.75) {
-                pts = 3;
-                outcomeTitle = "💥 極限勝利！(+3分)";
-            } else if (randOutcome > 0.4) {
-                pts = 2;
-                outcomeTitle = "🚀 擊飛勝利！(+2分)";
-            } else if (randOutcome > 0.2) {
-                pts = 2;
-                outcomeTitle = "⚡ 爆裂勝利！(+2分)";
-            }
-
-            // Determine Winner based on Beyblade Attack/Weight Stats
-            const playerPower = gameState.selectedPlayerBey.stats.attack + gameState.selectedPlayerBey.stats.weight;
-            const cpuPower = gameState.currentCpuBey.stats.attack + (Math.random() * 20);
-
-            const isPlayerWin = playerPower >= cpuPower;
-
-            if (isPlayerWin) {
-                gameState.playerMatchPoints += pts;
-            } else {
-                gameState.cpuMatchPoints += pts;
-            }
-
-            document.getElementById('playerMatchScore').innerText = gameState.playerMatchScore = gameState.playerMatchPoints;
-            document.getElementById('cpuMatchScore').innerText = gameState.cpuMatchScore = gameState.cpuMatchPoints;
-
-            // Display Round Winner Text
-            const announcer = document.getElementById('battleAnnouncer');
-            const txt = document.getElementById('announcerText');
-            announcer.style.opacity = '1';
-            txt.innerText = isPlayerWin ? `${gameState.selectedPlayerBey.name} ${outcomeTitle}` : `${gameState.currentCpuBey.name} 獲勝！`;
-
-            setTimeout(() => {
-                announcer.style.opacity = '0';
-                checkMatchVictory();
-            }, 1800);
-        }
-
-        function checkMatchVictory() {
-            if (gameState.playerMatchPoints >= 4) {
-                gameState.roundWins++;
-                document.getElementById('winsCounter').innerText = gameState.roundWins;
-                alert(`🎉 恭喜！你贏得了第 ${gameState.roundWins} 局對決勝利！`);
-                resetMatchScores();
-
-                if (gameState.roundWins >= 5) {
-                    triggerGrandChampionWin();
-                }
-            } else if (gameState.cpuMatchPoints >= 4) {
-                alert(`💔 本局由電腦獲勝！再試一次，或前往「答題館」解答問題解鎖更強陀螺吧！`);
-                resetMatchScores();
-            }
-        }
-
-        function resetMatchScores() {
-            gameState.playerMatchPoints = 0;
-            gameState.cpuMatchPoints = 0;
-            document.getElementById('playerMatchScore').innerText = 0;
-            document.getElementById('cpuMatchScore').innerText = 0;
-        }
-
-        function triggerGrandChampionWin() {
-            document.getElementById('winStudentInfo').innerText = `${studentProfile.className} 班 ${studentProfile.studentNum} 號`;
-            document.getElementById('victoryModal').classList.remove('hidden');
-            startFireworks();
-        }
-
-        /* ==========================================================================
-           10. CHAMPION CELEBRATION FIREWORKS CANVAS
-           ========================================================================== */
-        function startFireworks() {
-            const fwCanvas = document.getElementById('fireworksCanvas');
-            const fwCtx = fwCanvas.getContext('2d');
-            fwCanvas.width = window.innerWidth;
-            fwCanvas.height = window.innerHeight;
-
-            let particles = [];
-
-            function createFirework() {
-                const x = Math.random() * fwCanvas.width;
-                const y = Math.random() * (fwCanvas.height * 0.5);
-                const colors = ['#f59e0b', '#ef4444', '#3b82f6', '#10b981', '#ec4899', '#fef08a'];
-
-                for (let i = 0; i < 50; i++) {
-                    const ang = Math.random() * Math.PI * 2;
-                    const spd = Math.random() * 6 + 2;
-                    particles.push({
-                        x: x, y: y,
-                        vx: Math.cos(ang) * spd,
-                        vy: Math.sin(ang) * spd,
-                        color: colors[Math.floor(Math.random() * colors.length)],
-                        alpha: 1.0
-                    });
-                }
-            }
-
-            setInterval(createFirework, 400);
-
-            function loop() {
-                fwCtx.fillStyle = 'rgba(11, 15, 25, 0.2)';
-                fwCtx.fillRect(0, 0, fwCanvas.width, fwCanvas.height);
-
-                particles.forEach((p, i) => {
-                    fwCtx.beginPath();
-                    fwCtx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-                    fwCtx.fillStyle = p.color;
-                    fwCtx.fill();
-
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.alpha -= 0.015;
-
-                    if (p.alpha <= 0) particles.splice(i, 1);
-                });
-
-                requestAnimationFrame(loop);
-            }
-            loop();
-        }
-
-        /* ==========================================================================
-           11. TEACHER SECURITY (`LKM`), ANALYTICS & EXCEL EXPORT
-           ========================================================================== */
-        function openTeacherAuthModal() {
-            document.getElementById('teacherAuthModal').classList.remove('hidden');
-        }
-
-        function closeTeacherAuthModal() {
-            document.getElementById('teacherAuthModal').classList.add('hidden');
-        }
-
-        function verifyTeacherPassword() {
-            const pwd = document.getElementById('teacherPasswordInput').value.trim();
-            if (pwd === 'LKM') {
-                closeTeacherAuthModal();
-                document.getElementById('teacherPasswordInput').value = '';
-                openTeacherDashboard();
-            } else {
-                alert('❌ 密碼錯誤！請重新輸入。');
-            }
-        }
-
-        function openTeacherDashboard() {
-            document.getElementById('teacherDashboardModal').classList.remove('hidden');
-            renderTeacherAnalyticsTable();
-        }
-
-        function closeTeacherDashboard() {
-            document.getElementById('teacherDashboardModal').classList.add('hidden');
-        }
-
-        function renderTeacherAnalyticsTable() {
-            const tbody = document.getElementById('teacherTableBody');
-            tbody.innerHTML = '';
-
-            let firstCorrectCount = 0;
-            let finalCompletedCount = 0;
-
-            QUESTION_BANK.forEach(q => {
-                const rec = quizState.records[q.id];
-                const tr = document.createElement('tr');
-
-                let firstAttemptChoiceText = "未作答";
-                let firstAttemptStatusBadge = `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-500">未嘗試</span>`;
-                let errorAnalysisText = "尚待作答觀察";
-
                 if (rec) {
-                    firstAttemptChoiceText = q.options[rec.firstAttemptOption] || "未知";
-                    if (rec.firstAttemptCorrect) {
-                        firstCorrectCount++;
-                        firstAttemptStatusBadge = `<span class="px-2 py-0.5 rounded bg-green-950 text-green-300 font-bold border border-green-800">✅ 正確</span>`;
-                        errorAnalysisText = "理解透徹，無迷思概念。";
-                    } else {
-                        firstAttemptStatusBadge = `<span class="px-2 py-0.5 rounded bg-red-950 text-red-300 font-bold border border-red-800">❌ 錯誤</span>`;
-                        errorAnalysisText = q.errorAnalysis;
-                    }
-
-                    if (rec.retrySuccess || rec.isCorrect) finalCompletedCount++;
+                  if (rec.currentSelected === idx) {
+                    btnClass = isCurrentCorrect 
+                      ? "bg-emerald-600 border-emerald-500 text-white font-bold" 
+                      : "bg-rose-600 border-rose-500 text-white font-bold";
+                  }
                 }
 
-                tr.innerHTML = `
-                    <td class="p-3 font-bold text-amber-400">Q${q.id}</td>
-                    <td class="p-3 font-semibold text-slate-200 max-w-xs">${q.question}</td>
-                    <td class="p-3 text-cyan-400">${q.dimension}</td>
-                    <td class="p-3 font-bold text-green-400">${q.options[q.answer]}</td>
-                    <td class="p-3 text-slate-300">${firstAttemptChoiceText}</td>
-                    <td class="p-3">${firstAttemptStatusBadge}</td>
-                    <td class="p-3 text-slate-400 text-[11px] leading-tight max-w-xs">${errorAnalysisText}</td>
+                return `
+                  <button 
+                    onclick="answerQuestion(${q.id}, ${idx})"
+                    class="p-3 rounded-xl border text-left text-xs font-medium transition ${btnClass} flex items-center justify-between">
+                    <span>${opt}</span>
+                    ${rec && rec.firstSelected === idx ? `<span class="text-[10px] px-1.5 py-0.5 bg-gray-950/60 rounded text-gray-400 border border-gray-700">首答選項</span>` : ''}
+                  </button>
                 `;
-                tbody.appendChild(tr);
-            });
+              }).join('')}
+            </div>
 
-            // Summary Stats Calculation
-            document.getElementById('statTotalStudents').innerText = "1";
-            const firstAccPct = Math.round((firstCorrectCount / 12) * 100);
-            const finalCompPct = Math.round((finalCompletedCount / 12) * 100);
+            <!-- Hint Area (Shown if incorrect) -->
+            ${isAnswered && !isCurrentCorrect ? `
+              <div class="mt-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-300 flex items-start gap-2">
+                <i class="fa-solid fa-lightbulb text-amber-400 text-base mt-0.5"></i>
+                <div>
+                  <div class="font-bold">作答提示：</div>
+                  <div>${q.hint}</div>
+                  <div class="text-[11px] text-gray-400 mt-1">（請參考提示重新補答）</div>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
 
-            document.getElementById('statAvgFirstAcc').innerText = `${firstAccPct}%`;
-            document.getElementById('statFinalCompletion').innerText = `${finalCompPct}%`;
-        }
+    window.answerQuestion = function(qId, selectedIdx) {
+      const q = QUESTIONS.find(item => item.id === qId);
+      if (!q) return;
 
-        /* ==========================================================================
-           12. MULTI-TAB EXCEL (.xlsx) GENERATOR
-           ========================================================================== */
-        function exportToExcel() {
-            if (typeof XLSX === 'undefined') {
-                alert('Excel 匯出元件載入中，請稍後再試！');
-                return;
-            }
+      const isCorrect = selectedIdx === q.answer;
+      const existing = studentData.answers[qId];
 
-            const wb = XLSX.utils.book_new();
-
-            // SHEET 1: 班級與個人成績總覽
-            const summaryData = [
-                ["爆旋陀螺 閱讀理解大對決 - 學生答題成績總覽表"],
-                ["匯出時間", new Date().toLocaleString()],
-                [],
-                ["班別 (Class)", "學號 (Student No.)", "首答正確率 (First-Attempt Lock)", "最終通關進度", "對戰勝局"],
-                [
-                    studentProfile.className || "未填寫",
-                    studentProfile.studentNum || "未填寫",
-                    document.getElementById('statAvgFirstAcc').innerText,
-                    `${quizState.correctCount} / 12 正確`,
-                    `${gameState.roundWins} 勝`
-                ]
-            ];
-
-            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-            XLSX.utils.book_append_sheet(wb, wsSummary, "學生總體成績");
-
-            // SHEET 2: 全 12 題詳細作答記錄與迷思診斷
-            const detailHeaders = [
-                "題號", "完整題目內容", "考核知識層面", "標準正確答案", "學生首次選擇 (First-Attempt)", "首答判定", "最終補答狀態", "答錯原因與迷思分析"
-            ];
-
-            const detailRows = [detailHeaders];
-
-            QUESTION_BANK.forEach(q => {
-                const rec = quizState.records[q.id];
-                const firstChoice = rec ? q.options[rec.firstAttemptOption] : "未作答";
-                const isFirstCorrect = rec ? (rec.firstAttemptCorrect ? "正確" : "錯誤") : "未作答";
-                const isFinalCorrect = rec ? (rec.retrySuccess || rec.isCorrect ? "已成功解答" : "未通過") : "未作答";
-                const errorAnalysis = rec ? (rec.firstAttemptCorrect ? "理解透徹" : q.errorAnalysis) : "未作答";
-
-                detailRows.push([
-                    `Q${q.id}`,
-                    q.question,
-                    q.dimension,
-                    q.options[q.answer],
-                    firstChoice,
-                    isFirstCorrect,
-                    isFinalCorrect,
-                    errorAnalysis
-                ]);
-            });
-
-            const wsDetail = XLSX.utils.aoa_to_sheet(detailRows);
-            XLSX.utils.book_append_sheet(wb, wsDetail, "12題詳細記錄與迷思分析");
-
-            // Write File
-            const fileName = `爆旋陀螺_閱讀成績報告_${studentProfile.className || '無班別'}_${studentProfile.studentNum || '0'}.xlsx`;
-            XLSX.writeFile(wb, fileName);
-        }
-
-        /* Initialize App on Window Load */
-        window.onload = function() {
-            renderBeyDeck();
+      if (!existing) {
+        // First Attempt Lock: Permanent record for original score
+        studentData.answers[qId] = {
+          firstSelected: selectedIdx,
+          isFirstCorrect: isCorrect,
+          currentSelected: selectedIdx,
+          isCurrentCorrect: isCorrect,
+          timestamp: Date.now()
         };
-    </script>
+      } else {
+        // Re-attempt (補答) updates current result
+        existing.currentSelected = selectedIdx;
+        existing.isCurrentCorrect = isCorrect;
+        existing.reAttemptTimestamp = Date.now();
+      }
+
+      if (isCorrect) {
+        playSoundEffect('correct');
+      } else {
+        playSoundEffect('wrong');
+      }
+
+      syncStudentToCloud();
+    };
+
+    /* =========================================================================
+       6. BEYBLADE STADIUM CANVAS & PHYSICS SIMULATION
+       ========================================================================= */
+    const canvas = document.getElementById('stadium-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let isBattling = false;
+    let battleStartTime = 0;
+    let battleDuration = 3000; // 2 to 4 seconds
+    let sparkParticles = [];
+    
+    // Beyblade Physics Objects
+    let pBladeObj = { x: 180, y: 250, vx: 0, vy: 0, angle: 0, spinSpeed: 0.2 };
+    let aiBladeObj = { x: 320, y: 250, vx: 0, vy: 0, angle: 0, spinSpeed: 0.2 };
+
+    let currentMatchScorePlayer = 0;
+    let currentMatchScoreAI = 0;
+
+    function drawStadium() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const r = canvas.width / 2 - 10;
+
+      // Outer dish background
+      const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, r);
+      grad.addColorStop(0, '#111827');
+      grad.addColorStop(0.7, '#0f172a');
+      grad.addColorStop(1, '#020617');
+
+      ctx.save();
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Stadium Rails & Xtreme Line Rings
+      ctx.strokeStyle = '#1e3a8a';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.85, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ea580c';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([10, 8]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.6, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Center Emblem
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawBeyblade(obj, config, isAI = false) {
+      ctx.save();
+      ctx.translate(obj.x, obj.y);
+      ctx.rotate(obj.angle);
+
+      const radius = 28;
+
+      // Outer Spinning Blades
+      ctx.fillStyle = config.color;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3;
+        const x1 = Math.cos(a) * radius;
+        const y1 = Math.sin(a) * radius;
+        const x2 = Math.cos(a + 0.3) * (radius + 6);
+        const y2 = Math.sin(a + 0.3) * (radius + 6);
+        const x3 = Math.cos(a + 0.6) * radius;
+        const y3 = Math.sin(a + 0.6) * radius;
+        if (i === 0) ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x3, y3);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Inner Ratchet Ring
+      ctx.fillStyle = config.secondaryColor || '#374151';
+      ctx.beginPath();
+      ctx.arc(0, 0, radius - 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core Avatar Symbol
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(config.icon, 0, 0);
+
+      ctx.restore();
+    }
+
+    /* Spawn Sparks (少量火花) */
+    function createSparks(x, y, level) {
+      const count = level === 'high' ? 14 : level === 'medium' ? 8 : 4;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 4 + 2;
+        sparkParticles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1.0,
+          color: Math.random() > 0.5 ? '#fbbf24' : '#f97316'
+        });
+      }
+    }
+
+    function updateSparks() {
+      for (let i = sparkParticles.length - 1; i >= 0; i--) {
+        const p = sparkParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.05;
+
+        if (p.life <= 0) {
+          sparkParticles.splice(i, 1);
+        } else {
+          ctx.save();
+          ctx.globalAlpha = p.life;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+    }
+
+    function animateArena(timestamp) {
+      drawStadium();
+
+      const pConfig = BEYBLADES.find(b => b.id === studentData.selectedBeybladeId) || BEYBLADES[0];
+      const aiConfig = getAIBeyblade();
+
+      if (isBattling) {
+        const elapsed = timestamp - battleStartTime;
+
+        // Orbit & Collision physics simulation
+        pBladeObj.angle += 0.3 * pConfig.speedMultiplier;
+        aiBladeObj.angle -= 0.3 * aiConfig.speedMultiplier;
+
+        // Move towards center
+        pBladeObj.x += pBladeObj.vx;
+        pBladeObj.y += pBladeObj.vy;
+        aiBladeObj.x += aiBladeObj.vx;
+        aiBladeObj.y += aiBladeObj.vy;
+
+        // Collision Check
+        const dx = aiBladeObj.x - pBladeObj.x;
+        const dy = aiBladeObj.y - pBladeObj.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 56) {
+          // Bounce off each other
+          const overlap = 56 - dist;
+          const nx = dx / dist;
+          const ny = dy / dist;
+
+          pBladeObj.x -= nx * overlap * 0.5;
+          pBladeObj.y -= ny * overlap * 0.5;
+          aiBladeObj.x += nx * overlap * 0.5;
+          aiBladeObj.y += ny * overlap * 0.5;
+
+          pBladeObj.vx = -nx * 2;
+          pBladeObj.vy = -ny * 2;
+          aiBladeObj.vx = nx * 2;
+          aiBladeObj.vy = ny * 2;
+
+          // Spark visual & SFX
+          createSparks((pBladeObj.x + aiBladeObj.x) / 2, (pBladeObj.y + aiBladeObj.y) / 2, pConfig.sparkLevel);
+          playSoundEffect('clash');
+        }
+
+        // Keep inside stadium dish center gravitational pull
+        pBladeObj.vx += (250 - pBladeObj.x) * 0.01;
+        pBladeObj.vy += (250 - pBladeObj.y) * 0.01;
+        aiBladeObj.vx += (250 - aiBladeObj.x) * 0.01;
+        aiBladeObj.vy += (250 - aiBladeObj.y) * 0.01;
+
+        if (elapsed >= battleDuration) {
+          finishBattleRound();
+        }
+      }
+
+      drawBeyblade(pBladeObj, pConfig, false);
+      drawBeyblade(aiBladeObj, aiConfig, true);
+      updateSparks();
+
+      requestAnimationFrame(animateArena);
+    }
+
+    /* Start Battle Clash Animation */
+    function startBattleClash() {
+      if (isBattling) return;
+
+      // Mandatory check for Round 5 win condition:
+      if (studentData.currentRound >= 5) {
+        const finalCorrect = getFinalCorrectCount();
+        if (finalCorrect < 12) {
+          alert(`你還未解答正確全部 12 條故事題！\n現時已正答：${finalCorrect}/12 題。\n\n必須答對全部 12 條題目（包含補答正確）才能進入並勝出第 5 局終極大戰！請前往「袁隆平故事題庫」繼續答題！`);
+          // Switch to Quiz tab automatically
+          switchTab('tab-quiz');
+          return;
+        }
+      }
+
+      isBattling = true;
+      battleStartTime = performance.now();
+      // Battle time strictly between 2 to 4 seconds
+      battleDuration = Math.random() * 2000 + 2000;
+
+      // Set initial positions
+      pBladeObj = { x: 150, y: 250, vx: 3, vy: -1, angle: 0 };
+      aiBladeObj = { x: 350, y: 250, vx: -3, vy: 1, angle: 0 };
+
+      const launchBtn = document.getElementById('launch-battle-btn');
+      launchBtn.disabled = true;
+      launchBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+      addCombatLog("🚀 [GO SHOOT!] 兩枚爆旋陀螺高速進入競技場中圈！");
+    }
+
+    /* Determine Round Winner & Scoring */
+    function finishBattleRound() {
+      isBattling = false;
+      document.getElementById('launch-battle-btn').disabled = false;
+      document.getElementById('launch-battle-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+
+      const pConfig = BEYBLADES.find(b => b.id === studentData.selectedBeybladeId) || BEYBLADES[0];
+      const aiConfig = getAIBeyblade();
+
+      // Weight player stats against AI
+      const pScoreValue = pConfig.attack * 0.4 + pConfig.defense * 0.3 + pConfig.weight * 0.3;
+      const aiScoreValue = 50 * aiConfig.speedMultiplier;
+
+      const pWins = Math.random() * pScoreValue >= Math.random() * aiScoreValue;
+
+      let pointsGained = 1;
+      let finishType = "迴旋勝利 (Spin Finish)";
+
+      const randType = Math.random();
+      if (randType > 0.8) {
+        pointsGained = 3;
+        finishType = "極限勝利 (Xtreme Finish)";
+      } else if (randType > 0.4) {
+        pointsGained = 2;
+        finishType = Math.random() > 0.5 ? "擊飛勝利 (Over Finish)" : "爆裂勝利 (Burst Finish)";
+      } else {
+        pointsGained = 1;
+        finishType = "迴旋勝利 (Spin Finish)";
+      }
+
+      const banner = document.getElementById('clash-result-banner');
+      const overlay = document.getElementById('stadium-overlay-text');
+
+      if (pWins) {
+        currentMatchScorePlayer += pointsGained;
+        banner.textContent = `玩家：${finishType}！+${pointsGained}分`;
+        banner.className = "px-6 py-3 bg-emerald-500 text-gray-950 font-tech font-black text-xl rounded-2xl shadow-2xl border-2 border-white";
+        addCombatLog(`💥 [得分] 玩家陀螺打出【${finishType}】，獲得 ${pointsGained} 分！`);
+        playSoundEffect('victory');
+      } else {
+        currentMatchScoreAI += pointsGained;
+        banner.textContent = `電腦：${finishType}！+${pointsGained}分`;
+        banner.className = "px-6 py-3 bg-rose-600 text-white font-tech font-black text-xl rounded-2xl shadow-2xl border-2 border-white";
+        addCombatLog(`⚠️ [失分] 電腦陀螺打出【${finishType}】，電腦獲得 ${pointsGained} 分！`);
+        playSoundEffect('wrong');
+      }
+
+      document.getElementById('player-match-score').textContent = currentMatchScorePlayer;
+      document.getElementById('ai-match-score').textContent = currentMatchScoreAI;
+
+      overlay.style.opacity = '1';
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+      }, 1500);
+
+      // Check if match won (First to 4 points)
+      if (currentMatchScorePlayer >= 4) {
+        studentData.winsCount++;
+        addCombatLog(`🎉 [局勝出] 恭喜拿下第 ${studentData.currentRound} 局比賽勝利！`);
+        
+        if (studentData.winsCount >= 5) {
+          // Check if answered all 12 questions
+          const finalCorrect = getFinalCorrectCount();
+          if (finalCorrect >= 12) {
+            triggerGameVictoryFireworks();
+          } else {
+            studentData.currentRound = 5;
+            alert(`你已獲得 4 局勝利，即將進入第 5 局決戰！\n但必須答對全部 12 條故事題（現時：${finalCorrect}/12）才能觸發最終煙花通關畫面！`);
+            switchTab('tab-quiz');
+          }
+        } else {
+          studentData.currentRound++;
+          currentMatchScorePlayer = 0;
+          currentMatchScoreAI = 0;
+          document.getElementById('player-match-score').textContent = 0;
+          document.getElementById('ai-match-score').textContent = 0;
+        }
+
+        syncStudentToCloud();
+      } else if (currentMatchScoreAI >= 4) {
+        addCombatLog(`❌ 本局不敵對手。可前往「袁隆平故事題庫」答對 4 題或 8 題解鎖更高階陀螺再戰！`);
+        currentMatchScorePlayer = 0;
+        currentMatchScoreAI = 0;
+        document.getElementById('player-match-score').textContent = 0;
+        document.getElementById('ai-match-score').textContent = 0;
+      }
+    }
+
+    function addCombatLog(msg) {
+      const logBox = document.getElementById('combat-log');
+      const item = document.createElement('div');
+      item.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logBox.appendChild(item);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    /* =========================================================================
+       7. TEACHER ADMIN DASHBOARD & EXCEL MULTI-TAB EXPORT
+       ========================================================================= */
+    function updateAdminTableUI() {
+      const tbody = document.getElementById('admin-students-tbody');
+      document.getElementById('admin-total-students').textContent = allStudentsCloudRecords.length;
+
+      if (allStudentsCloudRecords.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500 italic">暫無學生答題記錄</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = allStudentsCloudRecords.map(s => {
+        const firstCorrect = getFirstAttemptCorrectCount(s.answers || {});
+        let finalCorrect = 0;
+        QUESTIONS.forEach(q => {
+          const rec = (s.answers || {})[q.id];
+          if (rec && rec.isCurrentCorrect) finalCorrect++;
+        });
+
+        const rate = Math.round((firstCorrect / 12) * 100);
+
+        const detailsStr = QUESTIONS.map(q => {
+          const rec = (s.answers || {})[q.id];
+          if (!rec) return `<span class="text-gray-600">Q${q.id}:-</span>`;
+          return rec.isFirstCorrect 
+            ? `<span class="text-emerald-400">Q${q.id}:${String.fromCharCode(65 + rec.firstSelected)}✓</span>`
+            : `<span class="text-rose-400">Q${q.id}:${String.fromCharCode(65 + rec.firstSelected)}✕</span>`;
+        }).join(' ');
+
+        return `
+          <tr class="hover:bg-gray-900/60 transition">
+            <td class="p-3 font-bold text-white">${s.userClass || '--'} - ${s.userStudentNo || '--'}</td>
+            <td class="p-3 text-amber-400 font-bold">${s.winsCount || 0} 局</td>
+            <td class="p-3 text-blue-400 font-bold">${firstCorrect} / 12</td>
+            <td class="p-3 text-emerald-400 font-bold">${finalCorrect} / 12</td>
+            <td class="p-3 font-bold">${rate}%</td>
+            <td class="p-3 text-[11px] font-mono leading-relaxed max-w-xs truncate">${detailsStr}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /* Multi-sheet Excel (.xlsx) Exporter using SheetJS */
+    function exportTeacherExcelReport() {
+      if (typeof XLSX === 'undefined') {
+        alert("Excel 導出組件加載中，請稍後再試！");
+        return;
+      }
+
+      const wb = XLSX.utils.book_new();
+
+      // SHEET 1: 學生總體成績 (Student Summary)
+      const sheet1Data = [
+        ["學生班別", "學生學號", "勝出局數", "首答正確題數 (First-Attempt Lock)", "最終正答題數 (含補答)", "首答正確率 (%)", "數據最後同步時間"]
+      ];
+
+      allStudentsCloudRecords.forEach(s => {
+        const firstCorrect = getFirstAttemptCorrectCount(s.answers || {});
+        let finalCorrect = 0;
+        QUESTIONS.forEach(q => {
+          const rec = (s.answers || {})[q.id];
+          if (rec && rec.isCurrentCorrect) finalCorrect++;
+        });
+        const rate = Math.round((firstCorrect / 12) * 100);
+        const timeStr = s.updatedAt ? new Date(s.updatedAt).toLocaleString() : '--';
+
+        sheet1Data.push([
+          s.userClass || '',
+          s.userStudentNo || '',
+          s.winsCount || 0,
+          firstCorrect,
+          finalCorrect,
+          `${rate}%`,
+          timeStr
+        ]);
+      });
+
+      const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
+      XLSX.utils.book_append_sheet(wb, ws1, "學生總體成績");
+
+      // SHEET 2: 各題首答作答記錄 (Detailed Responses)
+      const sheet2Header = ["學生班別", "學生學號"];
+      QUESTIONS.forEach(q => sheet2Header.push(`第${q.id}題首答選項`, `第${q.id}題首答是否正確`));
+      
+      const sheet2Data = [sheet2Header];
+
+      allStudentsCloudRecords.forEach(s => {
+        const row = [s.userClass || '', s.userStudentNo || ''];
+        QUESTIONS.forEach(q => {
+          const rec = (s.answers || {})[q.id];
+          if (rec) {
+            row.push(String.fromCharCode(65 + rec.firstSelected));
+            row.push(rec.isFirstCorrect ? "正確 (✓)" : "錯誤 (✕)");
+          } else {
+            row.push("未作答", "未作答");
+          }
+        });
+        sheet2Data.push(row);
+      });
+
+      const ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
+      XLSX.utils.book_append_sheet(wb, ws2, "各題作答記錄(首答)");
+
+      // SHEET 3: 知識層面與答錯原因分析 (Knowledge Layers & Root Causes)
+      const sheet3Data = [
+        ["題號", "完整題目內容", "標準答案", "知識層面 (Knowledge Domain)", "答錯原因與盲點分析 (Root Cause Analysis)"]
+      ];
+
+      QUESTIONS.forEach(q => {
+        sheet3Data.push([
+          `第 ${q.id} 題`,
+          q.question,
+          q.options[q.answer],
+          q.knowledgeLayer,
+          q.wrongReason
+        ]);
+      });
+
+      const ws3 = XLSX.utils.aoa_to_sheet(sheet3Data);
+      XLSX.utils.book_append_sheet(wb, ws3, "知識層面與答錯原因分析");
+
+      // Save XLSX File
+      XLSX.writeFile(wb, `爆旋陀螺_袁隆平故事理解全班報告_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    /* =========================================================================
+       8. FIREWORKS CANVAS ANIMATION (VICTORY SCREEN)
+       ========================================================================= */
+    let fireworksParticles = [];
+    let fireworksAnimId = null;
+
+    function triggerGameVictoryFireworks() {
+      const modal = document.getElementById('victory-modal');
+      document.getElementById('victory-user-id').textContent = `${studentData.userClass}-${studentData.userStudentNo}`;
+      modal.classList.remove('hidden');
+
+      const fCanvas = document.getElementById('fireworks-canvas');
+      fCanvas.width = window.innerWidth;
+      fCanvas.height = window.innerHeight;
+      const fCtx = fCanvas.getContext('2d');
+
+      fireworksParticles = [];
+
+      for (let i = 0; i < 120; i++) {
+        const x = Math.random() * fCanvas.width;
+        const y = Math.random() * (fCanvas.height * 0.6);
+        const color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+        for (let j = 0; j < 30; j++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 6 + 2;
+          fireworksParticles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 1.0,
+            color: color
+          });
+        }
+      }
+
+      function loopFireworks() {
+        fCtx.fillStyle = 'rgba(2, 6, 23, 0.2)';
+        fCtx.fillRect(0, 0, fCanvas.width, fCanvas.height);
+
+        for (let i = fireworksParticles.length - 1; i >= 0; i--) {
+          const p = fireworksParticles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.05; // gravity
+          p.alpha -= 0.015;
+
+          if (p.alpha <= 0) {
+            fireworksParticles.splice(i, 1);
+          } else {
+            fCtx.save();
+            fCtx.globalAlpha = p.alpha;
+            fCtx.fillStyle = p.color;
+            fCtx.beginPath();
+            fCtx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+            fCtx.fill();
+            fCtx.restore();
+          }
+        }
+
+        if (modal.classList.contains('hidden')) {
+          cancelAnimationFrame(fireworksAnimId);
+        } else {
+          fireworksAnimId = requestAnimationFrame(loopFireworks);
+        }
+      }
+
+      loopFireworks();
+      playSoundEffect('victory');
+    }
+
+    /* =========================================================================
+       9. TAB NAVIGATION & EVENT BINDINGS
+       ========================================================================= */
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.className = "nav-tab active px-5 py-2.5 text-sm font-bold rounded-t-xl bg-blue-600 text-white flex items-center gap-2 transition";
+        } else {
+          btn.className = "nav-tab px-5 py-2.5 text-sm font-bold rounded-t-xl bg-gray-800 text-gray-400 hover:text-white flex items-center gap-2 transition";
+        }
+      });
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        if (content.id === tabId) {
+          content.classList.remove('hidden');
+        } else {
+          content.classList.add('hidden');
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initAuth();
+
+      // Tab clicks
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      document.getElementById('goto-garage-btn').addEventListener('click', () => switchTab('tab-garage'));
+
+      // Launch Battle
+      document.getElementById('launch-battle-btn').addEventListener('click', startBattleClash);
+
+      // Audio Toggle
+      document.getElementById('bgm-toggle-btn').addEventListener('click', () => {
+        isMuted = !isMuted;
+        const icon = document.getElementById('bgm-icon');
+        if (isMuted) {
+          icon.className = "fa-solid fa-volume-xmark text-lg text-rose-400";
+        } else {
+          icon.className = "fa-solid fa-volume-high text-lg text-emerald-400";
+          initAudio();
+        }
+      });
+
+      // Login Form Submit
+      document.getElementById('login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        userClass = document.getElementById('input-class').value.trim().toUpperCase();
+        userStudentNo = document.getElementById('input-student-no').value.trim();
+
+        if (!userClass || !userStudentNo) return;
+
+        docId = `${userClass}_${userStudentNo}`;
+        studentData.userClass = userClass;
+        studentData.userStudentNo = userStudentNo;
+
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('tutorial-modal').classList.remove('hidden');
+        document.getElementById('header-user-info').classList.remove('hidden');
+        document.getElementById('main-nav-tabs').classList.remove('hidden');
+
+        subscribeCloudRecords();
+        syncStudentToCloud();
+      });
+
+      // Tutorial Skip / Close
+      document.getElementById('skip-tutorial-btn').addEventListener('click', () => {
+        document.getElementById('tutorial-modal').classList.add('hidden');
+      });
+      document.getElementById('close-tutorial-btn').addEventListener('click', () => {
+        document.getElementById('tutorial-modal').classList.add('hidden');
+      });
+
+      // Admin Passcode Bell Modal
+      document.getElementById('admin-bell-btn').addEventListener('click', () => {
+        document.getElementById('admin-modal').classList.remove('hidden');
+        document.getElementById('admin-passcode-view').classList.remove('hidden');
+        document.getElementById('admin-dashboard-view').classList.add('hidden');
+        document.getElementById('input-admin-passcode').value = '';
+        document.getElementById('admin-passcode-error').classList.add('hidden');
+      });
+
+      document.getElementById('cancel-admin-btn').addEventListener('click', () => {
+        document.getElementById('admin-modal').classList.add('hidden');
+      });
+
+      document.getElementById('submit-admin-btn').addEventListener('click', () => {
+        const pass = document.getElementById('input-admin-passcode').value;
+        if (pass === 'LKM') {
+          document.getElementById('admin-passcode-view').classList.add('hidden');
+          document.getElementById('admin-dashboard-view').classList.remove('hidden');
+          document.getElementById('admin-dashboard-view').style.display = 'flex';
+          updateAdminTableUI();
+        } else {
+          document.getElementById('admin-passcode-error').classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('close-admin-dashboard').addEventListener('click', () => {
+        document.getElementById('admin-modal').classList.add('hidden');
+      });
+
+      document.getElementById('export-excel-btn').addEventListener('click', exportTeacherExcelReport);
+
+      document.getElementById('replay-game-btn').addEventListener('click', () => {
+        document.getElementById('victory-modal').classList.add('hidden');
+      });
+
+      // Start Canvas Animation Loop
+      requestAnimationFrame(animateArena);
+    });
+  </script>
 </body>
 </html>
